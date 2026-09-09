@@ -2,750 +2,601 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Анализ поездок">
-    <meta name="theme-color" content="#4a7bc4">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🚗%3C/text%3E%3C/svg%3E">
-    <title>Анализ поездок</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogItCQ0L3QsNC70LjQtyDQv9C+0LXQt9C00L7QuiIsCiAgInNob3J0X25hbWUiOiAi0JDQvdCw0LvQuNC3INC/0L7QtdC30LTQvtC6IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiM0YTdiYzQiLAogICJ0aGVtZV9jb2xvciI6ICIjZmZmZmZmIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCc+PHRleHQgeT0nLjllbScgZm9udC1zaXplPSc5MCc+8J+mlzwvdGV4dD48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogInBuZyIKICAgIH0KICBdCn0=">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Анализ данных поездки</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%234a7bc4' stroke-width='1.5' d='M2 12 L5 8 L8 10 L11 5 L14 7'/%3E%3Crect x='1' y='13' width='14' height='1.5' fill='%234a7bc4'/%3E%3C/svg%3E">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        /* ===== iOS-оптимизированные стили ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* ===== CSS переменные для тем ===== */
         :root {
-            --bg-body: #f2f4f8;
+            --bg-body: #f0f4fd;
             --bg-dashboard: #ffffff;
-            --bg-card: #f8f9fc;
-            --bg-card-hover: #eef0f5;
-            --text-primary: #1c1c1e;
-            --text-secondary: #3a3a3c;
-            --text-muted: #8e8e93;
-            --text-light: #aeaeb2;
-            --border-color: #e5e5ea;
-            --shadow: 0 2px 12px rgba(0,0,0,0.08);
-            --shadow-hover: 0 4px 20px rgba(0,0,0,0.12);
+            --bg-widget: #f0f4fe;
+            --bg-widget-hover: #e6edfc;
+            --border-widget: rgba(255,255,255,0.5);
+            --text-primary: #0b1a33;
+            --text-secondary: #3c4b64;
+            --text-muted: #5a6f8c;
+            --text-light: #8696b2;
+            --shadow: 0 20px 48px rgba(0, 8, 28, 0.08);
+            --shadow-hover: 0 8px 20px rgba(30, 60, 130, 0.08);
+            --clock-bg: #1f2a44;
+            --clock-text: #f0f4ff;
+            --clock-border: #3b4a6b;
+            --clock-hover: #263459;
+            --modal-bg: #ffffff;
+            --modal-shadow: 0 30px 60px rgba(0, 8, 28, 0.3);
+            --border-color: #eef3fb;
             --btn-primary: #4a7bc4;
             --btn-primary-hover: #3a6ab0;
-            --btn-light: #e5e5ea;
-            --btn-light-hover: #d1d1d6;
-            --btn-light-text: #1c1c1e;
-            --btn-danger: #ff3b30;
-            --btn-danger-hover: #e0352b;
-            --btn-success: #34c759;
-            --btn-success-hover: #28a745;
-            --change-positive: #34c759;
-            --change-negative: #ff3b30;
-            --chart-grid-color: #e5e5ea;
-            --safe-top: env(safe-area-inset-top, 20px);
-            --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --btn-light: #d4e0f7;
+            --btn-light-hover: #c0d0ea;
+            --btn-light-text: #0b1a33;
+            --btn-danger: #c45a6b;
+            --btn-danger-hover: #b14a5a;
+            --btn-success: #2e7d5e;
+            --btn-success-hover: #1e6d4e;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --change-positive: #1a7d4a;
+            --change-negative: #b13a4b;
+            --table-header-bg: #e8edf8;
+            --table-row-hover: #f5f8ff;
+            --table-border: #dce3ef;
+            --input-bg: #ffffff;
+            --input-border: #c8d4e8;
+            --tooltip-bg: rgba(255, 255, 255, 0.97);
+            --tooltip-border: rgba(200, 212, 235, 0.5);
+            --login-gradient: linear-gradient(135deg, #4a7bc4 0%, #6b96d9 100%);
+            --login-gradient-logout: linear-gradient(135deg, #c45a6b 0%, #d97a8a 100%);
+            --login-shadow: 0 4px 15px rgba(74, 123, 196, 0.35);
+            --login-shadow-logout: 0 4px 15px rgba(196, 90, 107, 0.35);
+            --webkit-overflow-scrolling: touch;
+            --backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            --chart-grid-color: #dce3ef;
         }
+
+        @supports (-webkit-touch-callout: none) {
+            .modal-overlay { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+            .global-tooltip { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+            .clock-widget, .weather-widget, .stat-widget { -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+            th { position: -webkit-sticky; position: sticky; }
+            .dashboard, .container, .modal-content, .clock-widget, .weather-widget, .stat-widget, .global-tooltip, .toast {
+                -webkit-border-radius: 12px; border-radius: 12px;
+            }
+            .dashboard { -webkit-border-radius: 44px; border-radius: 44px; }
+            .login-btn { -webkit-border-radius: 40px; border-radius: 40px; }
+            .flex-row input[type="file"] { -webkit-appearance: none; appearance: none; }
+            .flex-row input[type="file"]::file-selector-button { -webkit-appearance: none; appearance: none; }
+            .form-group input, .settings-group input { -webkit-appearance: none; appearance: none; }
+            .top-bar-left .action-btn, .top-bar-left .settings-btn, .login-btn, .delete-btn, button {
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+
         [data-theme="dark"] {
-            --bg-body: #000000;
-            --bg-dashboard: #1c1c1e;
-            --bg-card: #2c2c2e;
-            --bg-card-hover: #3a3a3c;
-            --text-primary: #ffffff;
-            --text-secondary: #aeaeb2;
-            --text-muted: #8e8e93;
-            --text-light: #636366;
-            --border-color: #38383a;
-            --shadow: 0 2px 12px rgba(0,0,0,0.3);
-            --shadow-hover: 0 4px 20px rgba(0,0,0,0.4);
-            --btn-light: #3a3a3c;
-            --btn-light-hover: #4a4a4c;
-            --btn-light-text: #ffffff;
-            --chart-grid-color: #38383a;
+            --bg-body: #0d1117;
+            --bg-dashboard: #161b22;
+            --bg-widget: #21262d;
+            --bg-widget-hover: #2d333b;
+            --border-widget: rgba(255,255,255,0.08);
+            --text-primary: #e6edf3;
+            --text-secondary: #b0c4d9;
+            --text-muted: #8b9eb5;
+            --text-light: #6a7e9e;
+            --shadow: 0 20px 48px rgba(0,0,0,0.4);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.3);
+            --clock-bg: #0d1117;
+            --clock-text: #e6edf3;
+            --clock-border: #30363d;
+            --clock-hover: #161b22;
+            --modal-bg: #161b22;
+            --modal-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            --border-color: #30363d;
+            --btn-primary: #58a6ff;
+            --btn-primary-hover: #4796f0;
+            --btn-light: #2d3b52;
+            --btn-light-hover: #3b4a6b;
+            --btn-light-text: #e6edf3;
+            --btn-danger: #f85149;
+            --btn-danger-hover: #e03a32;
+            --btn-success: #3fb950;
+            --btn-success-hover: #2ea043;
+            --change-positive: #3fb950;
+            --change-negative: #f85149;
+            --table-header-bg: #21262d;
+            --table-row-hover: #1c2128;
+            --table-border: #30363d;
+            --input-bg: #0d1117;
+            --input-border: #30363d;
+            --tooltip-bg: rgba(22,27,34,0.97);
+            --tooltip-border: rgba(48,54,61,0.8);
+            --login-gradient: linear-gradient(135deg, #58a6ff 0%, #79b8ff 100%);
+            --login-gradient-logout: linear-gradient(135deg, #f85149 0%, #f4706a 100%);
+            --login-shadow: 0 4px 15px rgba(88,166,255,0.35);
+            --login-shadow-logout: 0 4px 15px rgba(248,81,73,0.35);
+            --chart-grid-color: #30363d;
         }
-        html, body {
-            height: 100%;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+
+        /* ===== Общие стили ===== */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+        body { background:var(--bg-body); min-height:100vh; padding:20px 24px; margin:0; transition:background var(--transition), color var(--transition); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+        .dashboard { width:100%; max-width:1200px; margin:0 auto; background:var(--bg-dashboard); border-radius:44px; box-shadow:var(--shadow); padding:28px 36px 32px; transition:all var(--transition); }
+
+        /* ===== Анимации ===== */
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes slideUp { from { transform:translateY(30px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        .fade-in { animation:fadeInUp 0.5s ease forwards; }
+
+        /* ===== Скрытые элементы ===== */
+        .hidden { display:none !important; }
+
+        /* ===== Верхняя панель ===== */
+        .top-bar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px 20px; margin-bottom:20px; }
+        .top-bar-left { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .top-bar-left .action-btn, .top-bar-left .settings-btn {
+            background:var(--btn-light); border:1px solid var(--border-widget); border-radius:40px; padding:8px 16px; cursor:pointer;
+            font-size:0.85rem; color:var(--btn-light-text); transition:all var(--transition); display:flex; align-items:center; gap:6px;
         }
-        body {
-            background: var(--bg-body);
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-            font-size: 16px;
-            color: var(--text-primary);
-            padding: 0;
-            margin: 0;
-            transition: background 0.3s, color 0.3s;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            padding-top: var(--safe-top);
-            padding-bottom: var(--safe-bottom);
-        }
-        .app-container {
-            max-width: 430px;
-            margin: 0 auto;
-            padding: 12px 16px 30px;
-            min-height: 100vh;
-            background: var(--bg-dashboard);
-            transition: background 0.3s;
-        }
-        /* ===== Верхняя панель (iOS-стиль) ===== */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0 12px;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .top-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .top-bar-left .action-btn,
-        .top-bar-left .settings-btn {
-            background: var(--btn-light);
-            border: none;
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--btn-light-text);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            -webkit-touch-callout: none;
-        }
-        .top-bar-left .action-btn:active,
-        .top-bar-left .settings-btn:active {
-            transform: scale(0.94);
-            background: var(--btn-light-hover);
-        }
+        .top-bar-left .action-btn:hover, .top-bar-left .settings-btn:hover { background:var(--btn-light-hover); transform:translateY(-1px); }
+        .top-bar-left .action-btn:active, .top-bar-left .settings-btn:active { transform:scale(0.95); }
+
+        /* ===== Кнопка входа/выхода ===== */
         .login-btn {
-            background: var(--btn-primary);
-            border: none;
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            border:none; border-radius:40px; padding:10px 24px; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all var(--transition);
+            display:flex; align-items:center; gap:8px; color:#fff; letter-spacing:0.3px; position:relative; overflow:hidden;
+            background:var(--login-gradient); box-shadow:var(--login-shadow);
         }
-        .login-btn:active {
-            transform: scale(0.94);
-            background: var(--btn-primary-hover);
-        }
-        .login-btn.logged-in {
-            background: var(--btn-danger);
-        }
-        .login-btn.logged-in:active {
-            background: var(--btn-danger-hover);
-        }
-        /* ===== Статус-бар ===== */
+        .login-btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); transition:left 0.6s ease; }
+        .login-btn:hover::before { left:100%; }
+        .login-btn:hover { transform:translateY(-2px) scale(1.02); box-shadow:var(--login-shadow-hover); }
+        .login-btn:active { transform:scale(0.97); }
+        .login-btn.logged-in { background:var(--login-gradient-logout); box-shadow:var(--login-shadow-logout); }
+        .login-btn.logged-in:hover { box-shadow:var(--login-shadow-logout-hover); }
+        .login-btn .icon { font-size:1.1rem; transition:transform 0.3s ease; }
+        .login-btn:hover .icon { transform:rotate(-5deg) scale(1.1); }
+        .login-btn.logged-in:hover .icon { transform:rotate(10deg) scale(1.1); }
+
+        /* ===== СТАТУС-БАР ===== */
         .status-bar {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 6px 14px;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 4px 8px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
+            margin:0 0 12px 0; font-size:0.75rem; color:var(--text-light); padding:6px 12px; background:var(--bg-widget);
+            border-radius:40px; border:1px solid var(--border-widget); display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:8px 16px;
         }
-        .status-bar .auth-status.authorized { color: var(--change-positive); }
-        .status-bar .auth-status.unauthorized { color: var(--change-negative); }
-        /* ===== Виджеты статистики ===== */
-        .widgets-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
+        .status-bar .auth-status.authorized { color:var(--change-positive); }
+        .status-bar .auth-status.unauthorized { color:var(--change-negative); }
+
+        /* ===== Виджеты статистики (групповые) ===== */
+        .widget-row { display:flex; flex-wrap:wrap; gap:16px 24px; margin-bottom:20px; align-items:stretch; }
         .stat-widget {
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            transition: all 0.2s;
+            background:var(--bg-widget); padding:12px 20px; border-radius:16px; border:1px solid var(--border-widget);
+            backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); box-shadow:0 2px 6px rgba(0,0,0,0.02);
+            transition:all var(--transition); cursor:default; flex:1 1 180px; min-width:160px; display:flex; flex-direction:column; gap:4px;
         }
-        .stat-widget:active {
-            transform: scale(0.97);
-            background: var(--bg-card-hover);
-        }
+        .stat-widget:hover { background:var(--bg-widget-hover); border-color:var(--border-widget); box-shadow:var(--shadow-hover); transform:translateY(-2px) scale(1.01); }
         .stat-widget .stat-header {
-            font-weight: 600;
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
+            font-weight:600; font-size:0.85rem; color:var(--text-secondary); margin-bottom:2px;
+            display:flex; align-items:center; justify-content:space-between;
         }
         .stat-widget .stat-header .period-picker {
-            cursor: pointer;
-            font-size: 0.8rem;
-            padding: 0 4px;
+            cursor:pointer; font-size:0.9rem; padding:0 4px; border-radius:4px; transition:background var(--transition);
         }
-        .stat-widget .stat-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            padding: 1px 0;
-        }
-        .stat-widget .stat-row .stat-value {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.7rem;
-        }
+        .stat-widget .stat-header .period-picker:hover { background:var(--bg-widget-hover); }
+        .stat-widget .stat-row { display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); padding:1px 0; }
+        .stat-widget .stat-row .stat-value { font-weight:600; color:var(--text-primary); }
+
         /* ===== Часы и погода ===== */
-        .right-widget {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-        }
+        .right-widget { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; margin-left:auto; }
         .clock-widget {
-            background: var(--bg-card);
-            padding: 6px 16px;
-            border-radius: 30px;
-            border: 1px solid var(--border-color);
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
+            background:var(--clock-bg); padding:10px 24px; border-radius:60px; color:var(--clock-text);
+            box-shadow:0 6px 14px rgba(20,30,60,0.15); border:1px solid var(--clock-border); transition:all var(--transition);
+            cursor:default; backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); white-space:nowrap;
         }
-        .clock-date { font-size: 0.7rem; color: var(--text-muted); }
-        .clock-time { font-weight: 600; font-size: 1rem; }
+        .clock-widget:hover { background:var(--clock-hover); border-color:var(--clock-border); box-shadow:0 10px 24px rgba(0,20,60,0.2); transform:scale(1.02); }
+        .clock-date { font-size:0.8rem; font-weight:400; letter-spacing:0.5px; color:#b2c6ed; margin-right:10px; }
+        .clock-time { font-size:1.3rem; font-weight:600; letter-spacing:1px; color:#ffffff; }
+
         .weather-widget {
-            background: var(--bg-card);
-            padding: 4px 14px;
-            border-radius: 30px;
-            border: 1px solid var(--border-color);
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
+            background:var(--clock-bg); padding:6px 16px; border-radius:40px; color:var(--clock-text); border:1px solid var(--clock-border);
+            font-size:0.8rem; display:flex; align-items:center; gap:8px; transition:all var(--transition);
+            backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.1);
+            min-height:32px;
         }
-        .weather-widget .weather-icon { font-size: 1rem; }
-        /* ===== Контейнеры ===== */
-        .container {
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
+        .weather-widget:hover { background:var(--clock-hover); border-color:var(--clock-border); transform:scale(1.02); }
+        .weather-widget .weather-icon { font-size:1.2rem; line-height:1; }
+        .weather-widget .weather-temp { font-weight:600; }
+        .weather-widget .weather-desc { opacity:0.8; font-size:0.75rem; }
+
+        /* ===== Глобальный тултип ===== */
+        .global-tooltip {
+            position:fixed; z-index:100000; background:var(--tooltip-bg); border-radius:12px; padding:12px 16px;
+            box-shadow:var(--modal-shadow); border:1px solid var(--tooltip-border); backdrop-filter:blur(6px);
+            -webkit-backdrop-filter:blur(6px); color:var(--text-primary); font-size:0.8rem; line-height:1.6;
+            pointer-events:none; display:none; min-width:200px; max-width:280px; transition:opacity 0.15s ease;
         }
-        .container h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
+
+        /* ===== Модальные окна ===== */
+        .modal-overlay {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45);
+            backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:999; align-items:center; justify-content:center;
+            animation:fadeIn 0.25s ease;
         }
-        .flex-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .modal-overlay.active { display:flex; }
+        .modal-content {
+            background:var(--modal-bg); border-radius:32px; padding:28px 32px 24px; max-width:850px; width:92%;
+            box-shadow:var(--modal-shadow); animation:slideUp 0.3s ease; position:relative; color:var(--text-primary);
+            max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
         }
-        .flex-row input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 2px dashed var(--border-color);
-            border-radius: 10px;
-            background: var(--bg-dashboard);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            -webkit-appearance: none;
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:2px solid var(--border-color); padding-bottom:12px; flex-wrap:wrap; gap:10px; }
+        .modal-header h3 { font-size:1.2rem; font-weight:600; color:var(--text-primary); }
+        .modal-close {
+            background:var(--bg-widget); border:none; border-radius:50%; width:36px; height:36px; font-size:1.2rem;
+            cursor:pointer; color:var(--text-secondary); transition:all var(--transition); display:flex; align-items:center; justify-content:center;
         }
-        .flex-row input[type="file"]::file-selector-button {
-            padding: 6px 14px;
-            border-radius: 8px;
-            border: none;
-            background: var(--btn-primary);
-            color: white;
-            font-size: 0.8rem;
-            cursor: pointer;
-            -webkit-appearance: none;
+        .modal-close:hover { background:var(--bg-widget-hover); transform:rotate(90deg) scale(1.1); }
+
+        .settings-group { margin-bottom:20px; }
+        .settings-group label { display:block; font-weight:500; color:var(--text-secondary); margin-bottom:6px; font-size:0.9rem; }
+        .settings-group input {
+            width:100%; padding:8px 12px; border-radius:40px; border:1px solid var(--border-widget); background:var(--bg-widget);
+            color:var(--text-primary); font-size:0.9rem; outline:none; transition:all var(--transition);
         }
-        /* ===== Кнопки ===== */
-        .btn {
-            background: var(--btn-primary);
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            min-height: 44px;
-            touch-action: manipulation;
-            -webkit-touch-callout: none;
-        }
-        .btn:active { transform: scale(0.96); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-light {
-            background: var(--btn-light);
-            color: var(--btn-light-text);
-        }
-        .btn-light:active { background: var(--btn-light-hover); }
-        .btn-success { background: var(--btn-success); }
-        .btn-success:active { background: var(--btn-success-hover); }
-        .btn-danger { background: var(--btn-danger); }
-        .btn-danger:active { background: var(--btn-danger-hover); }
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .btn-row {
-            display: flex;
-            gap: 8px;
-        }
-        .btn-row .btn { flex: 1; }
-        /* ===== Форма ===== */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px 8px;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .form-group label {
-            font-weight: 500;
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-        }
+        .settings-group input:focus { border-color:var(--btn-primary); box-shadow:0 0 0 2px var(--btn-primary)30; }
+        .settings-group .hint { font-size:0.75rem; color:var(--text-light); margin-top:4px; }
+        .settings-group .hint a { color:var(--btn-primary); text-decoration:none; }
+        .settings-group .hint a:hover { text-decoration:underline; }
+
+        .login-error { color:var(--change-negative); font-size:0.85rem; margin-top:8px; display:none; }
+
+        /* ===== Форма данных поездки (все поля) ===== */
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin:10px 0; }
+        .form-group { display:flex; flex-direction:column; gap:3px; }
+        .form-group label { font-weight:600; font-size:0.78rem; color:var(--text-secondary); white-space:nowrap; }
         .form-group input {
-            padding: 8px 10px;
-            border: 1.5px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            width: 100%;
-            min-height: 36px;
-            background: var(--bg-dashboard);
-            color: var(--text-primary);
-            -webkit-appearance: none;
+            padding:8px 10px; border:1.5px solid var(--input-border); border-radius:6px; font-size:0.9rem; width:100%;
+            min-height:40px; background:var(--input-bg); color:var(--text-primary);
         }
-        .form-group input:focus {
-            border-color: var(--btn-primary);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(74,123,196,0.2);
+        .form-group input:focus { border-color:var(--btn-primary); box-shadow:0 0 0 2px var(--btn-primary)30; }
+        .form-group input.found { background:#d5f5e3; border-color:var(--change-positive); }
+        .form-group input[readonly] { background:var(--bg-widget); }
+
+        /* ===== Кнопки ===== */
+        button {
+            background:var(--btn-light); color:var(--btn-light-text); border:1px solid var(--border-widget); padding:14px 20px;
+            border-radius:8px; font-size:1rem; cursor:pointer; transition:all var(--transition); width:100%; touch-action:manipulation;
+            min-height:48px;
         }
-        .form-group input[readonly] { background: var(--bg-card); opacity: 0.7; }
-        .form-group input.found { background: #d5f5e3; border-color: var(--change-positive); }
+        button:active { transform:scale(0.97); }
+        button:hover { background:var(--btn-light-hover); }
+        button:disabled { background:#95a5a6; cursor:not-allowed; opacity:0.7; }
+        .save-btn { background:var(--btn-light); margin-top:8px; }
+        .save-btn:hover { background:var(--btn-light-hover); }
+        .clear-btn { background:var(--btn-light); margin-top:8px; }
+        .clear-btn:hover { background:var(--btn-light-hover); }
+
+        .btn-group { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+        .btn-group .btn-row { display:flex; gap:8px; }
+        .btn-group .btn-row button { flex:1; }
+        .btn-group .btn-row button:last-child { background:var(--btn-light); }
+        .btn-group .btn-row button:last-child:hover { background:var(--btn-light-hover); }
+
         /* ===== Таблица ===== */
         .table-wrapper {
             overflow-x: auto;
             overflow-y: auto;
-            max-height: 300px;
+            max-height: 400px;
             -webkit-overflow-scrolling: touch;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+            border: 1px solid var(--table-border);
+            border-radius: 8px;
         }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.7rem;
-            min-width: 600px;
+            width:100%;
+            border-collapse:collapse;
+            font-size:0.8rem;
+            min-width:700px;
+            position:relative;
+            z-index:1;
         }
         th, td {
-            padding: 6px 4px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
+            padding:8px 6px;
+            text-align:left;
+            border-bottom:1px solid var(--table-border);
+            white-space:nowrap;
+            background:var(--bg-dashboard);
+            position:relative;
+            z-index:1;
         }
         th {
-            background: var(--bg-card);
-            font-weight: 600;
-            font-size: 0.65rem;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            color: var(--text-secondary);
+            background:var(--table-header-bg);
+            font-weight:600;
+            font-size:0.75rem;
+            position:-webkit-sticky;
+            position:sticky;
+            top:0;
+            z-index:2;
+            color:var(--text-secondary);
         }
-        td { font-size: 0.7rem; color: var(--text-primary); }
+        td {
+            font-size:0.8rem;
+            color:var(--text-primary);
+        }
         .delete-btn {
-            background: var(--btn-danger);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 0.65rem;
-            cursor: pointer;
+            background:var(--btn-danger); color:#fff; padding:4px 10px; font-size:0.7rem; border:none; border-radius:4px;
+            cursor:pointer; width:auto; min-height:30px;
         }
-        .delete-btn:active { transform: scale(0.92); }
+        .delete-btn:hover { background:var(--btn-danger-hover); }
         .sort-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 0.65rem;
-            cursor: pointer;
-            padding: 2px 4px;
+            background:transparent; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.7rem; padding:2px 6px;
+            width:auto; min-height:20px; display:inline-block;
         }
-        .clear-all-wrapper { margin-top: 6px; }
-        /* ===== Модальные окна ===== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        .sort-btn:hover { color:var(--text-primary); background:var(--bg-widget-hover); border-radius:4px; }
+
+        .clear-all-wrapper { position:relative; z-index:0; margin-top:-10px; padding-top:10px; }
+        .clear-all-wrapper .clear-btn { position:relative; z-index:0; opacity:0.7; transition:opacity var(--transition); }
+        .clear-all-wrapper .clear-btn:hover { opacity:1; }
+        .table-wrapper + .clear-all-wrapper { margin-top:0; }
+
+        .status { margin:10px 0; font-weight:500; color:#e67e22; padding:8px 12px; border-radius:6px; background:#fef9e7; font-size:0.95rem; }
+        .status.success { color:var(--change-positive); background:#eafaf1; }
+        .status.error { color:var(--change-negative); background:#fdedec; }
+
+        .preview-img { max-width:100%; max-height:150px; border-radius:8px; border:1px solid var(--border-color); margin:10px 0; object-fit:contain; width:100%; }
+        .ocr-text-box { display:none; }
+        .log-area {
+            background:var(--bg-widget); border:1px solid var(--border-color); border-radius:6px; padding:8px 10px;
+            max-height:120px; overflow-y:auto; -webkit-overflow-scrolling:touch; font-family:'Courier New', monospace;
+            font-size:0.7rem; margin-top:8px; white-space:pre-wrap; word-break:break-all; color:var(--text-secondary);
         }
-        .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: var(--bg-dashboard);
-            border-radius: 20px;
-            padding: 20px 24px;
-            max-width: 400px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            animation: slideUp 0.3s ease;
+
+        .auto-fill-badge { display:inline-block; background:var(--change-positive); color:white; padding:2px 10px; border-radius:12px; font-size:0.7rem; margin-left:8px; }
+
+        .container { background:var(--bg-dashboard); padding:15px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.08); margin-bottom:15px; border:1px solid var(--border-color); }
+
+        .flex-row { display:flex; flex-direction:column; gap:10px; margin:10px 0; }
+        .flex-row input[type="file"] {
+            width:100%; padding:12px; border:2px dashed var(--input-border); border-radius:8px; background:var(--bg-widget);
+            font-size:0.95rem; color:var(--text-secondary);
         }
-        @keyframes slideUp {
-            from { transform: translateY(40px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .flex-row input[type="file"]::file-selector-button {
+            padding:8px 16px; border-radius:6px; border:none; background:var(--btn-light); color:var(--btn-light-text);
+            font-size:0.9rem; cursor:pointer;
         }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-        .modal-header h3 { font-size: 1.1rem; font-weight: 600; }
-        .modal-close {
-            background: var(--btn-light);
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-        }
-        .modal-close:active { transform: scale(0.9); }
-        .settings-group { margin-bottom: 16px; }
-        .settings-group label {
-            display: block;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-            font-size: 0.85rem;
-        }
-        .settings-group input {
-            width: 100%;
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-card);
-            color: var(--text-primary);
-            font-size: 0.85rem;
-            -webkit-appearance: none;
-        }
-        .settings-group .hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
-        .settings-group .hint a { color: var(--btn-primary); text-decoration: none; }
-        .login-error { color: var(--change-negative); font-size: 0.8rem; margin-top: 6px; display: none; }
-        /* ===== Чарт ===== */
-        .chart-container-modal { height: 240px; width: 100%; margin-top: 8px; }
+        .flex-row input[type="file"]::file-selector-button:hover { background:var(--btn-light-hover); }
+
+        /* ===== Диаграмма в модальном окне ===== */
+        .chart-container-modal { position:relative; height:300px; width:100%; margin-top:10px; }
+        .chart-container-modal canvas { width:100% !important; height:100% !important; border-radius:8px; background:var(--chart-bg); }
+        .chart-legend { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:12px; font-size:0.8rem; color:var(--text-secondary); }
+        .chart-legend-item { display:flex; align-items:center; gap:6px; }
+        .chart-legend-color { width:16px; height:4px; border-radius:2px; }
         .chart-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 12px;
-            justify-content: center;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin: 8px 0;
+            display:flex; flex-wrap:wrap; gap:12px 20px; margin-top:12px; justify-content:center; font-size:0.9rem; color:var(--text-secondary);
+            align-items:center;
         }
-        .chart-controls label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .chart-controls input[type="checkbox"],
-        .chart-controls input[type="radio"] {
-            accent-color: var(--btn-primary);
-            width: 16px;
-            height: 16px;
-        }
+        .chart-controls label { display:flex; align-items:center; gap:6px; cursor:pointer; }
+        .chart-controls input[type="checkbox"] { width:18px; height:18px; accent-color:var(--btn-primary); cursor:pointer; }
+        .chart-controls input[type="radio"] { accent-color:var(--btn-primary); cursor:pointer; }
+        /* Даты и период */
         .period-selector {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px 12px;
+            align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         .period-selector button {
+            width: auto;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            min-height: 34px;
             background: var(--btn-light);
-            border: none;
-            border-radius: 16px;
-            padding: 4px 12px;
-            font-size: 0.7rem;
+            border: 1px solid var(--border-widget);
+            border-radius: 20px;
             color: var(--btn-light-text);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--transition);
         }
-        .period-selector button:active { transform: scale(0.92); }
-        .period-selector button.active {
-            background: var(--btn-primary);
-            color: #fff;
-        }
+        .period-selector button:hover { background: var(--btn-light-hover); }
+        .period-selector button.active { background: var(--btn-primary); color: #fff; border-color: var(--btn-primary); }
         .period-selector .date-range {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.75rem;
+            gap: 8px;
+            font-size: 0.85rem;
         }
         .period-selector .date-range input[type="date"] {
-            padding: 2px 6px;
+            padding: 4px 8px;
             border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-card);
+            border: 1px solid var(--border-widget);
+            background: var(--input-bg);
             color: var(--text-primary);
-            font-size: 0.7rem;
-            -webkit-appearance: none;
+            font-size: 0.8rem;
         }
+        .period-selector .date-range span { color: var(--text-muted); }
         .stats-summary {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px 16px;
+            gap: 16px 24px;
             justify-content: center;
-            padding: 6px 8px;
-            background: var(--bg-card);
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: var(--bg-widget);
+            border-radius: 12px;
+            border: 1px solid var(--border-widget);
         }
         .stats-summary .stat-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
         .stats-summary .stat-item .stat-number {
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             color: var(--text-primary);
         }
-        .chart-legend {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-            font-size: 0.7rem;
-            color: var(--text-secondary);
+
+        /* ===== Модальное окно выбора периода для виджетов ===== */
+        .period-picker-modal .modal-content {
+            max-width: 400px;
         }
-        .chart-legend-color { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+        .period-picker-modal .settings-group input[type="date"] {
+            border-radius: 6px;
+        }
+
         /* ===== Toast ===== */
         .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
-            right: 20px;
-            background: var(--bg-dashboard);
-            color: var(--text-primary);
-            padding: 12px 20px;
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            border: 1px solid var(--border-color);
-            font-size: 0.85rem;
-            z-index: 1000;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.4s ease;
-            text-align: center;
+            position:fixed; bottom:30px; right:30px; background:var(--bg-dashboard); color:var(--text-primary);
+            padding:14px 24px; border-radius:16px; box-shadow:var(--modal-shadow); border:1px solid var(--border-color);
+            font-size:0.9rem; z-index:1000; transform:translateY(100px); opacity:0; transition:all 0.4s ease; max-width:90vw;
         }
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .toast.success { border-left: 4px solid var(--change-positive); }
-        .toast.error { border-left: 4px solid var(--change-negative); }
-        .toast.warning { border-left: 4px solid #f0ad4e; }
-        /* ===== Скрытые элементы ===== */
-        .hidden { display: none !important; }
-        .ocr-text-box { display: none; }
-        .log-area {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 8px 10px;
-            max-height: 80px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 0.65rem;
-            margin-top: 6px;
-            white-space: pre-wrap;
-            word-break: break-all;
-            color: var(--text-muted);
-        }
-        .auto-fill-badge {
-            display: inline-block;
-            background: var(--change-positive);
-            color: #fff;
-            padding: 1px 8px;
-            border-radius: 10px;
-            font-size: 0.6rem;
-            margin-left: 6px;
-        }
-        .status { margin: 6px 0; font-size: 0.8rem; color: var(--text-muted); }
-        .status.success { color: var(--change-positive); }
-        .status.error { color: var(--change-negative); }
-        .preview-img {
-            max-width: 100%;
-            max-height: 120px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            margin: 6px 0;
-            object-fit: contain;
-        }
-        .global-tooltip {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            background: var(--bg-dashboard);
-            color: var(--text-primary);
-            padding: 8px 12px;
-            border-radius: 10px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            border: 1px solid var(--border-color);
-            font-size: 0.7rem;
-            max-width: 220px;
-            pointer-events: none;
-        }
+        .toast.show { transform:translateY(0); opacity:1; }
+        .toast.success { border-left:4px solid var(--change-positive); }
+        .toast.error { border-left:4px solid var(--change-negative); }
+        .toast.warning { border-left:4px solid #f0ad4e; }
+
         /* ===== Адаптация ===== */
-        @media (max-width: 380px) {
-            .widgets-grid { grid-template-columns: 1fr 1fr; }
-            .form-grid { grid-template-columns: 1fr; }
-            .stat-widget .stat-header { font-size: 0.65rem; }
-            .stat-widget .stat-row { font-size: 0.6rem; }
-            .stat-widget .stat-row .stat-value { font-size: 0.65rem; }
+        @media (max-width:768px) {
+            body { padding:12px; }
+            .dashboard { padding:16px; border-radius:28px; }
+            .top-bar-left { gap:8px; }
+            .top-bar-left .action-btn, .top-bar-left .settings-btn { padding:6px 12px; font-size:0.75rem; }
+            .clock-widget { padding:8px 16px; }
+            .clock-date { font-size:0.7rem; }
+            .clock-time { font-size:1rem; }
+            .right-widget { margin-left:0; align-items:flex-start; }
+            .form-grid { grid-template-columns:1fr 1fr; gap:6px 8px; }
+            .form-group label { font-size:0.7rem; }
+            .form-group input { font-size:0.85rem; padding:6px 8px; min-height:36px; }
+            .modal-content { padding:16px; max-width:95%; }
+            table { font-size:0.7rem; min-width:600px; }
+            th, td { padding:5px 4px; }
+            .login-btn { padding:8px 16px; font-size:0.8rem; }
+            .weather-widget { font-size:0.7rem; padding:4px 12px; }
+            .status-bar { font-size:0.7rem; padding:4px 12px; flex-direction:column; align-items:flex-start; }
+            .stat-widget { padding:8px 14px; min-width:140px; flex:1 1 150px; }
+            .stat-widget .stat-header { font-size:0.75rem; }
+            .stat-widget .stat-row { font-size:0.7rem; }
+            .global-tooltip { min-width:160px; max-width:220px; font-size:0.7rem; padding:8px 12px; }
+            .chart-container-modal { height:250px; }
+            .chart-controls { gap:8px 12px; font-size:0.8rem; }
+            .table-wrapper { max-height: 300px; }
+            .period-selector { gap:6px; }
+            .period-selector button { font-size:0.7rem; padding:4px 10px; min-height:28px; }
+            .stats-summary { gap:12px; padding:6px 10px; }
+            .stats-summary .stat-item { font-size:0.7rem; }
+            .stats-summary .stat-item .stat-number { font-size:0.9rem; }
         }
-        @media (min-width: 430px) {
-            .app-container { padding: 16px 20px 40px; }
-            .widgets-grid { gap: 12px; }
+        @media (max-width:480px) {
+            .top-bar-left .action-btn, .top-bar-left .settings-btn { padding:4px 10px; font-size:0.7rem; }
+            .form-grid { grid-template-columns:1fr; }
+            .login-btn { padding:6px 12px; font-size:0.75rem; }
+            table { font-size:0.65rem; min-width:500px; }
+            .stat-widget { padding:6px 10px; min-width:120px; }
+            .stat-widget .stat-header { font-size:0.7rem; }
+            .stat-widget .stat-row { font-size:0.65rem; }
+            .global-tooltip { min-width:140px; max-width:200px; font-size:0.65rem; padding:6px 10px; }
+            .chart-container-modal { height:220px; }
+            .table-wrapper { max-height: 250px; }
+            .period-selector .date-range input[type="date"] { font-size:0.7rem; padding:2px 4px; width:120px; }
         }
-        /* ===== iOS Safari исправления ===== */
-        input, textarea, button { -webkit-appearance: none; }
-        input[type="date"] { min-height: 36px; }
-        .modal-content { -webkit-overflow-scrolling: touch; }
-        .table-wrapper { -webkit-overflow-scrolling: touch; }
+        @supports (-webkit-touch-callout: none) {
+            .dashboard { padding:28px 36px 32px; }
+            .clock-widget, .weather-widget, .stat-widget { -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px); }
+            .global-tooltip { -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+            .modal-overlay { -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+            .top-bar-left .action-btn, .top-bar-left .settings-btn { -webkit-tap-highlight-color:transparent; }
+            .login-btn { -webkit-tap-highlight-color:transparent; }
+            .delete-btn { -webkit-tap-highlight-color:transparent; }
+            button { -webkit-tap-highlight-color:transparent; }
+        }
     </style>
 </head>
 <body>
-<div class="app-container" id="app">
+<div class="dashboard">
 
     <!-- Верхняя панель -->
     <div class="top-bar">
         <div class="top-bar-left">
-            <button class="action-btn" id="themeToggle">🌙</button>
-            <button class="action-btn" id="settingsBtn">⚙️</button>
-            <button class="action-btn" id="saveCloudBtn">☁️ Сохранить</button>
-            <button class="action-btn" id="loadCloudBtn">☁️ Загрузить</button>
-            <button class="action-btn" id="chartBtn">📊</button>
+            <button class="action-btn" id="settingsBtn">⚙️ Настройки облака</button>
+            <button class="action-btn" id="saveCloudBtn">☁️ Сохранить в облако</button>
+            <button class="action-btn" id="loadCloudBtn">☁️ Загрузить из облака</button>
+            <button class="action-btn" id="chartBtn">📊 Диаграмма</button>
         </div>
-        <button class="login-btn" id="loginBtn">
-            <span id="loginIcon">🔐</span>
-            <span id="loginLabel">Войти</span>
-        </button>
+        <div class="top-bar-right">
+            <button class="login-btn" id="loginBtn">
+                <span class="icon" id="loginIcon">🔐</span>
+                <span id="loginLabel">Войти</span>
+            </button>
+        </div>
     </div>
 
     <!-- Статус-бар -->
     <div class="status-bar">
-        <span id="dataSource">📊 Локальное хранилище</span>
-        <span id="lastUpdate">—</span>
+        <span><span class="source">📊 Источник: </span><span id="dataSource">Локальное хранилище</span></span>
+        <span><span>🔄 обновлено: </span><span class="update-time" id="lastUpdate">—</span></span>
         <span id="authStatus" class="auth-status unauthorized">🔒 Требуется вход</span>
     </div>
 
-    <!-- Виджеты статистики -->
-    <div class="widgets-grid" id="statWidgets">
+    <!-- Виджеты статистики с выбором периода -->
+    <div class="widget-row" id="statWidgets">
         <div class="stat-widget" id="statDay">
             <div class="stat-header">
-                📅 День
-                <span class="period-picker" data-target="day">📅</span>
+                📅 За сегодня
+                <span class="period-picker" data-target="day" title="Выбрать период">📅</span>
             </div>
-            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="dayTotalDist">0 км</span></div>
-            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="dayAvgCharge">0 %</span></div>
-            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="dayAvgFuel">0 %</span></div>
+            <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="dayTotalDist">0 км</span></div>
+            <div class="stat-row"><span>В среднем</span><span class="stat-value" id="dayAvgDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="dayAvgCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо (ср.)</span><span class="stat-value" id="dayAvgFuel">0 %</span></div>
         </div>
         <div class="stat-widget" id="statWeek">
             <div class="stat-header">
-                📅 Неделя
-                <span class="period-picker" data-target="week">📅</span>
+                📅 За неделю
+                <span class="period-picker" data-target="week" title="Выбрать период">📅</span>
             </div>
-            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="weekTotalDist">0 км</span></div>
-            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="weekAvgCharge">0 %</span></div>
-            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="weekAvgFuel">0 %</span></div>
+            <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="weekTotalDist">0 км</span></div>
+            <div class="stat-row"><span>В среднем</span><span class="stat-value" id="weekAvgDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="weekAvgCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо (ср.)</span><span class="stat-value" id="weekAvgFuel">0 %</span></div>
         </div>
         <div class="stat-widget" id="statMonth">
             <div class="stat-header">
-                📅 Месяц
-                <span class="period-picker" data-target="month">📅</span>
+                📅 За месяц
+                <span class="period-picker" data-target="month" title="Выбрать период">📅</span>
             </div>
-            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="monthTotalDist">0 км</span></div>
-            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="monthAvgCharge">0 %</span></div>
-            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="monthAvgFuel">0 %</span></div>
+            <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="monthTotalDist">0 км</span></div>
+            <div class="stat-row"><span>В среднем</span><span class="stat-value" id="monthAvgDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="monthAvgCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо (ср.)</span><span class="stat-value" id="monthAvgFuel">0 %</span></div>
         </div>
-    </div>
-
-    <!-- Часы и погода -->
-    <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-        <div class="clock-widget">
-            <span class="clock-date" id="current-date">—</span>
-            <span class="clock-time" id="current-time">--:--</span>
-        </div>
-        <div class="weather-widget" id="weatherWidget">
-            <span class="weather-icon" id="weatherIcon">⏳</span>
-            <span class="weather-temp" id="weatherTemp">--°C</span>
+        <div class="right-widget">
+            <div class="clock-widget">
+                <span class="clock-date" id="current-date">—</span>
+                <span class="clock-time" id="current-time">--:--</span>
+            </div>
+            <div class="weather-widget" id="weatherWidget">
+                <span class="weather-icon" id="weatherIcon">⏳</span>
+                <span class="weather-temp" id="weatherTemp">--°C</span>
+                <span class="weather-desc" id="weatherDesc">загрузка...</span>
+            </div>
         </div>
     </div>
 
     <!-- Блоки, скрытые до авторизации -->
     <div id="authRequiredSections" class="hidden">
-        <!-- Распознавание -->
+        <!-- Блок распознавания -->
         <div class="container">
             <h3>📸 1. Загрузите скриншот</h3>
             <div class="flex-row">
-                <input type="file" id="imageInput" accept="image/*" capture="environment">
-                <button class="btn" id="recognizeBtn">🚀 Распознать</button>
+                <input type="file" id="imageInput" accept="image/*">
+                <button id="recognizeBtn">🚀 Распознать и заполнить</button>
             </div>
             <div id="previewContainer"></div>
             <div id="statusMessage" class="status"></div>
@@ -753,68 +604,67 @@
 
         <div class="container">
             <h3>📝 2. Распознанный текст <span id="ocrStatus"></span></h3>
-            <textarea id="ocrText" class="ocr-text-box" readonly></textarea>
+            <textarea id="ocrText" class="ocr-text-box" readonly placeholder="Здесь будет отображаться распознанный текст..."></textarea>
             <div class="log-area" id="debugLog">📋 Лог распознавания...</div>
         </div>
 
-        <!-- Форма данных -->
         <div class="container">
-            <h3>📊 3. Данные поездки <span class="auto-fill-badge">✨ Авто</span></h3>
+            <h3>📊 3. Данные поездки <span class="auto-fill-badge">✨ Автозаполнение</span></h3>
             <div class="form-grid" id="formGrid">
                 <div class="form-group">
-                    <label for="tripDate">📅 Дата</label>
-                    <input type="text" id="tripDate" placeholder="ДД.ММ.ГГГГ">
+                    <label for="tripDate">📅 Дата поездки</label>
+                    <input type="text" id="tripDate" placeholder="ДД.ММ.ГГГГ или 01092026">
                 </div>
                 <div class="form-group">
-                    <label for="startTime">📍 Старт</label>
-                    <input type="text" id="startTime" placeholder="07:37">
+                    <label for="startTime">📍 Старт (время)</label>
+                    <input type="text" id="startTime" placeholder="07:37 или 0737">
                 </div>
                 <div class="form-group">
-                    <label for="endTime">🏁 Финиш</label>
-                    <input type="text" id="endTime" placeholder="15:45">
+                    <label for="endTime">🏁 Финиш (время)</label>
+                    <input type="text" id="endTime" placeholder="15:45 или 1545">
                 </div>
                 <div class="form-group">
-                    <label for="duration">⏱ Продолж.</label>
+                    <label for="duration">⏱ Продолжительность</label>
                     <input type="text" id="duration" placeholder="01:15" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="distance">📏 Расст., км</label>
+                    <label for="distance">📏 Расстояние, км</label>
                     <input type="text" id="distance" placeholder="12.5">
                 </div>
                 <div class="form-group">
-                    <label for="chargeStart">🔋 Нач. заряд, %</label>
+                    <label for="chargeStart">🔋 Начальный уровень заряда, %</label>
                     <input type="text" id="chargeStart" placeholder="85">
                 </div>
                 <div class="form-group">
-                    <label for="chargeEnd">🔋 Кон. заряд, %</label>
+                    <label for="chargeEnd">🔋 Конечный уровень заряда, %</label>
                     <input type="text" id="chargeEnd" placeholder="60">
                 </div>
                 <div class="form-group">
-                    <label for="chargeUsed">⚡ Израсход., %</label>
+                    <label for="chargeUsed">⚡ Израсходовано зарядки, %</label>
                     <input type="text" id="chargeUsed" placeholder="25" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="fuelStart">⛽ Нач. топливо, %</label>
+                    <label for="fuelStart">⛽ Начальный уровень топлива, %</label>
                     <input type="text" id="fuelStart" placeholder="50">
                 </div>
                 <div class="form-group">
-                    <label for="fuelEnd">⛽ Кон. топливо, %</label>
+                    <label for="fuelEnd">⛽ Конечный уровень топлива, %</label>
                     <input type="text" id="fuelEnd" placeholder="30">
                 </div>
                 <div class="form-group">
-                    <label for="fuelUsed">⛽ Израсход., %</label>
+                    <label for="fuelUsed">⛽ Израсходовано топлива, %</label>
                     <input type="text" id="fuelUsed" placeholder="20" readonly>
                 </div>
             </div>
             <div class="btn-group">
-                <button class="btn btn-success" id="saveBtn">💾 Сохранить</button>
+                <button id="saveBtn" class="save-btn">💾 Сохранить поездку</button>
                 <div class="btn-row">
-                    <button class="btn btn-light" id="clearFieldsBtn">🧹 Очистить</button>
+                    <button id="clearFieldsBtn">🧹 Очистить</button>
                 </div>
             </div>
         </div>
 
-        <!-- Таблица -->
+        <!-- Таблица сохранённых поездок -->
         <div class="container">
             <h3>📋 4. Сохранённые поездки</h3>
             <div class="table-wrapper">
@@ -824,20 +674,20 @@
                             <th>Дата <button class="sort-btn" id="sortDateBtn">↕</button></th>
                             <th>Старт</th>
                             <th>Финиш</th>
-                            <th>Прод.</th>
-                            <th>Км</th>
-                            <th>Заряд%</th>
-                            <th>Топливо%</th>
-                            <th></th>
+                            <th>Продолжительность</th>
+                            <th>Расстояние, км</th>
+                            <th>Израсходовано зарядки, %</th>
+                            <th>Израсходовано топлива, %</th>
+                            <th>Действие</th>
                         </tr>
                     </thead>
                     <tbody id="recordsBody">
-                        <tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:12px;">Нет записей</td></tr>
+                        <tr><td colspan="8" style="text-align:center; color:var(--text-light); padding:15px;">Нет сохранённых записей</td></tr>
                     </tbody>
                 </table>
             </div>
             <div class="clear-all-wrapper">
-                <button class="btn btn-danger" id="clearAllBtn">🗑 Очистить все</button>
+                <button id="clearAllBtn" class="clear-btn">🗑 Очистить все записи</button>
             </div>
         </div>
     </div>
@@ -846,32 +696,35 @@
 
 <!-- ===== МОДАЛЬНЫЕ ОКНА ===== -->
 
-<!-- Настройки -->
+<!-- Настройки облака -->
 <div class="modal-overlay" id="settingsModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>⚙️ Настройки</h3>
+            <h3>⚙️ Настройки облака</h3>
             <button class="modal-close" id="settingsClose">✕</button>
         </div>
         <div class="settings-group">
             <label for="yandexTokenInputSettings">🔑 Токен Яндекс Диска</label>
             <input type="password" id="yandexTokenInputSettings" placeholder="Вставьте OAuth-токен">
-            <div class="hint"><a href="https://yandex.ru/dev/disk/poligon/" target="_blank">Получить токен</a></div>
-            <div style="display:flex; gap:8px; margin-top:8px;">
-                <button class="btn btn-success" id="saveTokenSettingsBtn" style="flex:1; padding:8px;">💾 Сохранить</button>
-                <button class="btn btn-danger" id="resetTokenSettingsBtn" style="flex:1; padding:8px;">🗑 Сбросить</button>
+            <div class="hint">
+                <a href="https://yandex.ru/dev/disk/poligon/" target="_blank">Получить токен</a>
+                (нажмите «Получить токен» и скопируйте)
+            </div>
+            <div style="margin-top:8px; display:flex; gap:8px;">
+                <button id="saveTokenSettingsBtn" style="width:auto; padding:8px 20px; background:var(--btn-light); color:var(--btn-light-text);">💾 Сохранить</button>
+                <button id="resetTokenSettingsBtn" style="width:auto; padding:8px 20px; background:var(--btn-light); color:var(--btn-light-text);">🗑 Сбросить</button>
             </div>
             <div class="login-error" id="tokenSettingsError" style="display:none;">Токен не может быть пустым</div>
         </div>
-        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted);">
-            Токен сохраняется в локальном хранилище
+        <div style="margin-top:12px; text-align:right; font-size:0.75rem; color:var(--text-light);">
+            Токен сохраняется в локальном хранилище браузера.
         </div>
     </div>
 </div>
 
-<!-- Токен -->
+<!-- Токен Яндекс Диска -->
 <div class="modal-overlay" id="tokenModal">
-    <div class="modal-content" style="max-width:400px;">
+    <div class="modal-content" style="max-width:480px;">
         <div class="modal-header">
             <h3>🔑 Токен Яндекс Диска</h3>
             <button class="modal-close" id="tokenModalClose">✕</button>
@@ -879,16 +732,22 @@
         <div class="settings-group">
             <label for="yandexTokenInput">Введите OAuth-токен</label>
             <input type="password" id="yandexTokenInput" placeholder="Вставьте токен сюда">
-            <div class="hint"><a href="https://yandex.ru/dev/disk/poligon/" target="_blank">Получить токен</a></div>
+            <div class="hint" style="margin-top:8px;">
+                <a href="https://yandex.ru/dev/disk/poligon/" target="_blank">Получить токен</a>
+                (нажмите «Получить токен» и скопируйте)
+            </div>
             <div class="login-error" id="tokenError" style="display:none;">Токен не может быть пустым</div>
         </div>
-        <button class="btn" id="tokenSubmit">Сохранить токен</button>
+        <button class="action-btn" id="tokenSubmit" style="width:100%; justify-content:center; background:var(--btn-light); color:var(--btn-light-text);">Сохранить токен</button>
+        <div style="margin-top:12px; text-align:right; font-size:0.75rem; color:var(--text-light);">
+            Токен будет сохранён в локальном хранилище браузера.
+        </div>
     </div>
 </div>
 
 <!-- Авторизация -->
 <div class="modal-overlay" id="loginModal">
-    <div class="modal-content" style="max-width:380px;">
+    <div class="modal-content" style="max-width:400px;">
         <div class="modal-header">
             <h3 id="loginTitle">🔐 Вход</h3>
             <button class="modal-close" id="loginModalClose">✕</button>
@@ -899,15 +758,66 @@
             <div class="hint" id="loginHint">Код действует только в этом браузере.</div>
             <div class="login-error" id="loginError">Неверный код доступа</div>
         </div>
-        <button class="btn" id="loginSubmit">Войти</button>
+        <button class="action-btn" id="loginSubmit" style="width:100%; justify-content:center; background:var(--btn-primary); color:#fff;">Войти</button>
     </div>
 </div>
 
-<!-- Выбор периода для виджетов -->
-<div class="modal-overlay" id="periodPickerModal">
-    <div class="modal-content" style="max-width:380px;">
+<!-- Диаграмма -->
+<div class="modal-overlay" id="chartModal">
+    <div class="modal-content" style="max-width:850px;">
         <div class="modal-header">
-            <h3>📅 Выбор периода</h3>
+            <h3>📊 Анализ данных за период</h3>
+            <button class="modal-close" id="chartModalClose">✕</button>
+        </div>
+        <div class="period-selector" id="periodSelector">
+            <button data-period="today" class="active">Сегодня</button>
+            <button data-period="week">Неделя</button>
+            <button data-period="month">Месяц</button>
+            <button data-period="custom">Произвольный</button>
+            <div class="date-range" id="dateRange" style="display:none;">
+                <span>с</span>
+                <input type="date" id="startDate">
+                <span>по</span>
+                <input type="date" id="endDate">
+                <button id="applyRangeBtn" style="width:auto; padding:4px 12px; min-height:30px; font-size:0.8rem;">Применить</button>
+            </div>
+        </div>
+        <div class="stats-summary" id="statsSummary">
+            <div class="stat-item"><span>Пробег</span><span class="stat-number" id="sumDist">0 км</span></div>
+            <div class="stat-item"><span>Заряд</span><span class="stat-number" id="sumCharge">0 %</span></div>
+            <div class="stat-item"><span>Топливо</span><span class="stat-number" id="sumFuel">0 %</span></div>
+            <div class="stat-item"><span>Кол-во записей</span><span class="stat-number" id="sumCount">0</span></div>
+        </div>
+        <div class="chart-controls">
+            <label><input type="checkbox" id="chkDistance" checked> Пробег, км</label>
+            <label><input type="checkbox" id="chkCharge" checked> Расход зарядки, %</label>
+            <label><input type="checkbox" id="chkFuel" checked> Расход топлива, %</label>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <span>Тип:</span>
+                <label><input type="radio" name="chartType" value="bar" checked> Столбцы</label>
+                <label><input type="radio" name="chartType" value="line"> Линия</label>
+            </div>
+            <label><input type="checkbox" id="chkAvg"> Средние значения</label>
+        </div>
+        <div class="chart-container-modal">
+            <canvas id="chartCanvas"></canvas>
+        </div>
+        <div class="chart-legend">
+            <span class="chart-legend-item"><span class="chart-legend-color" style="background:#4a7bc4;"></span> Пробег, км</span>
+            <span class="chart-legend-item"><span class="chart-legend-color" style="background:#2ecc71;"></span> Расход зарядки, %</span>
+            <span class="chart-legend-item"><span class="chart-legend-color" style="background:#e67e22;"></span> Расход топлива, %</span>
+        </div>
+        <div style="margin-top:10px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
+            По каждой дате построены значения из таблицы
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно выбора периода для виджетов -->
+<div class="modal-overlay period-picker-modal" id="periodPickerModal">
+    <div class="modal-content" style="max-width:400px;">
+        <div class="modal-header">
+            <h3>Выбор периода</h3>
             <button class="modal-close" id="periodPickerClose">✕</button>
         </div>
         <div class="settings-group">
@@ -916,56 +826,17 @@
             <label for="periodPickerEnd" style="margin-top:8px;">Конец</label>
             <input type="date" id="periodPickerEnd">
         </div>
-        <button class="btn" id="periodPickerApply">Применить</button>
-    </div>
-</div>
-
-<!-- Диаграмма -->
-<div class="modal-overlay" id="chartModal">
-    <div class="modal-content" style="max-width:430px;">
-        <div class="modal-header">
-            <h3>📊 Анализ</h3>
-            <button class="modal-close" id="chartModalClose">✕</button>
-        </div>
-        <div class="period-selector" id="periodSelector">
-            <button data-period="today" class="active">Сегодня</button>
-            <button data-period="week">Неделя</button>
-            <button data-period="month">Месяц</button>
-            <button data-period="custom">Свои</button>
-            <div class="date-range" id="dateRange" style="display:none;">
-                <input type="date" id="startDate" style="width:120px;">
-                <span>—</span>
-                <input type="date" id="endDate" style="width:120px;">
-                <button id="applyRangeBtn" style="background:var(--btn-primary); color:#fff; border:none; border-radius:12px; padding:4px 12px; font-size:0.7rem;">Ok</button>
-            </div>
-        </div>
-        <div class="stats-summary" id="statsSummary">
-            <div class="stat-item"><span>Пробег</span><span class="stat-number" id="sumDist">0 км</span></div>
-            <div class="stat-item"><span>Заряд</span><span class="stat-number" id="sumCharge">0 %</span></div>
-            <div class="stat-item"><span>Топливо</span><span class="stat-number" id="sumFuel">0 %</span></div>
-            <div class="stat-item"><span>Записей</span><span class="stat-number" id="sumCount">0</span></div>
-        </div>
-        <div class="chart-controls">
-            <label><input type="checkbox" id="chkDistance" checked> Км</label>
-            <label><input type="checkbox" id="chkCharge" checked> Заряд</label>
-            <label><input type="checkbox" id="chkFuel" checked> Топливо</label>
-            <label><input type="radio" name="chartType" value="bar" checked> Столб</label>
-            <label><input type="radio" name="chartType" value="line"> Линия</label>
-            <label><input type="checkbox" id="chkAvg"> Ср.</label>
-        </div>
-        <div class="chart-container-modal">
-            <canvas id="chartCanvas"></canvas>
-        </div>
-        <div class="chart-legend">
-            <span><span class="chart-legend-color" style="background:#4a7bc4;"></span> Пробег</span>
-            <span><span class="chart-legend-color" style="background:#2ecc71;"></span> Заряд</span>
-            <span><span class="chart-legend-color" style="background:#e67e22;"></span> Топливо</span>
+        <button id="periodPickerApply" style="width:100%; margin-top:8px;">Применить</button>
+        <div style="margin-top:8px; text-align:center; font-size:0.75rem; color:var(--text-muted);">
+            Будут показаны данные за выбранный период.
         </div>
     </div>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- Глобальный тултип -->
 <div class="global-tooltip" id="globalTooltip"></div>
 
 <script>
@@ -976,31 +847,34 @@
     // 0. Глобальный тултип
     // ==========================================
     const tooltipEl = document.getElementById('globalTooltip');
+
     function showTooltipHtml(html, x, y) {
         tooltipEl.style.display = 'block';
         tooltipEl.innerHTML = html;
-        let left = x + 12;
-        let top = y + 12;
+        let left = x + 20;
+        let top = y + 20;
         tooltipEl.style.left = left + 'px';
         tooltipEl.style.top = top + 'px';
         requestAnimationFrame(() => {
             const rect = tooltipEl.getBoundingClientRect();
-            if (rect.right > window.innerWidth - 8) {
-                left = x - rect.width - 12;
-                if (left < 8) left = 8;
+            if (rect.right > window.innerWidth - 10) {
+                left = Math.max(10, left - (rect.right - window.innerWidth + 10));
                 tooltipEl.style.left = left + 'px';
             }
-            if (rect.bottom > window.innerHeight - 8) {
-                top = y - rect.height - 12;
-                if (top < 8) top = 8;
+            if (rect.bottom > window.innerHeight - 10) {
+                top = y - rect.height - 20;
+                if (top < 10) top = 10;
                 tooltipEl.style.top = top + 'px';
             }
         });
     }
-    function hideTooltip() { tooltipEl.style.display = 'none'; }
+
+    function hideTooltip() {
+        tooltipEl.style.display = 'none';
+    }
 
     // ==========================================
-    // 1. Состояние
+    // 1. Тема (автоматическая)
     // ==========================================
     let state = {
         theme: 'light',
@@ -1019,53 +893,69 @@
             }
         } catch(e) {}
     }
+
     function saveSettings() {
         try {
-            localStorage.setItem('dashboardSettings', JSON.stringify({ theme: state.theme }));
+            localStorage.setItem('dashboardSettings', JSON.stringify({
+                theme: state.theme
+            }));
         } catch(e) {}
     }
+
     const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         state.theme = theme;
-        document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
         saveSettings();
     }
+
     function autoThemeCheck() {
-        const target = systemThemeQuery.matches ? 'dark' : 'light';
-        if (state.theme !== target) applyTheme(target);
+        const targetTheme = systemThemeQuery.matches ? 'dark' : 'light';
+        if (state.theme !== targetTheme) {
+            applyTheme(targetTheme);
+        }
     }
+
     if (typeof systemThemeQuery.addEventListener === 'function') {
         systemThemeQuery.addEventListener('change', function(e) {
             applyTheme(e.matches ? 'dark' : 'light');
         });
     }
-    document.getElementById('themeToggle').addEventListener('click', function() {
-        applyTheme(state.theme === 'light' ? 'dark' : 'light');
-    });
 
     // ==========================================
-    // 2. Авторизация
+    // 2. АВТОРИЗАЦИЯ
     // ==========================================
     const PASSCODE_HASH_KEY = 'tripPasscodeHash';
+
     async function hashPasscode(passcode) {
         const bytes = new TextEncoder().encode(passcode);
         const digest = await crypto.subtle.digest('SHA-256', bytes);
-        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+        return Array.from(new Uint8Array(digest))
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');
     }
+
     function updateLoginModalMode() {
         const hasPasscode = Boolean(localStorage.getItem(PASSCODE_HASH_KEY));
-        document.getElementById('loginTitle').textContent = hasPasscode ? '🔐 Вход' : '🔐 Создание кода';
-        document.getElementById('loginPasswordLabel').textContent = hasPasscode ? 'Код доступа' : 'Придумайте код';
-        document.getElementById('loginPassword').placeholder = hasPasscode ? 'Введите код' : 'Не менее 4 символов';
+        document.getElementById('loginTitle').textContent = hasPasscode ? '🔐 Вход' : '🔐 Создание кода доступа';
+        document.getElementById('loginPasswordLabel').textContent = hasPasscode ? 'Код доступа' : 'Придумайте код доступа';
+        document.getElementById('loginPassword').placeholder = hasPasscode ? 'Введите код доступа' : 'Не менее 4 символов';
+        document.getElementById('loginPassword').autocomplete = hasPasscode ? 'current-password' : 'new-password';
+        document.getElementById('loginHint').textContent = hasPasscode
+            ? 'Код действует только в этом браузере.'
+            : 'Код будет сохранён в этом браузере только как SHA-256-хеш.';
         document.getElementById('loginSubmit').textContent = hasPasscode ? 'Войти' : 'Создать код';
     }
+
     function updateAuthUI() {
         const status = document.getElementById('authStatus');
         const btn = document.getElementById('loginBtn');
         const icon = document.getElementById('loginIcon');
         const label = document.getElementById('loginLabel');
+
         const authBlock = document.getElementById('authRequiredSections');
+
         if (state.authenticated) {
             status.textContent = '✅ Авторизован';
             status.className = 'auth-status authorized';
@@ -1086,13 +976,18 @@
             authBlock.classList.add('hidden');
             clearInactivityTimer();
             document.getElementById('recordsBody').innerHTML =
-                '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:12px;">Нет записей</td></tr>';
-            ['dayTotalDist','dayAvgCharge','dayAvgFuel','weekTotalDist','weekAvgCharge','weekAvgFuel','monthTotalDist','monthAvgCharge','monthAvgFuel'].forEach(id => {
+                '<tr><td colspan="8" style="text-align:center; color:var(--text-light); padding:15px;">Нет сохранённых записей</td></tr>';
+            // Обнуляем виджеты
+            ['dayTotalDist','dayAvgDist','dayAvgCharge','dayAvgFuel',
+             'weekTotalDist','weekAvgDist','weekAvgCharge','weekAvgFuel',
+             'monthTotalDist','monthAvgDist','monthAvgCharge','monthAvgFuel'
+            ].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = '0';
             });
         }
     }
+
     async function login(password) {
         const error = document.getElementById('loginError');
         if (password.length < 4) {
@@ -1100,9 +995,11 @@
             error.style.display = 'block';
             return;
         }
+
         const storedHash = localStorage.getItem(PASSCODE_HASH_KEY);
         const enteredHash = await hashPasscode(password);
         const isFirstLogin = !storedHash;
+
         if (isFirstLogin || storedHash === enteredHash) {
             if (isFirstLogin) localStorage.setItem(PASSCODE_HASH_KEY, enteredHash);
             state.authenticated = true;
@@ -1110,12 +1007,13 @@
             updateAuthUI();
             document.getElementById('loginModal').classList.remove('active');
             error.style.display = 'none';
-            showToast(isFirstLogin ? 'Код создан' : 'Добро пожаловать!', 'success');
+            showToast(isFirstLogin ? 'Код доступа создан' : 'Добро пожаловать!', 'success');
         } else {
             error.textContent = 'Неверный код доступа';
             error.style.display = 'block';
         }
     }
+
     function logout() {
         state.authenticated = false;
         saveSettings();
@@ -1123,6 +1021,7 @@
         clearInactivityTimer();
         showToast('Вы вышли из системы', 'warning');
     }
+
     function resetInactivityTimer() {
         if (state.authenticated) {
             clearTimeout(state.inactivityTimeout);
@@ -1132,44 +1031,21 @@
             }, state.inactivityDelay);
         }
     }
+
     function startInactivityTimer() {
         resetInactivityTimer();
-        ['mousemove','click','keydown','scroll','touchstart'].forEach(ev => {
-            document.addEventListener(ev, resetInactivityTimer, { passive: true });
+        const events = ['mousemove', 'click', 'keydown', 'scroll', 'touchstart'];
+        events.forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, { passive: true });
         });
     }
+
     function clearInactivityTimer() {
         clearTimeout(state.inactivityTimeout);
     }
 
-    document.getElementById('loginBtn').addEventListener('click', function() {
-        if (state.authenticated) { logout(); }
-        else {
-            updateLoginModalMode();
-            document.getElementById('loginModal').classList.add('active');
-            document.getElementById('loginError').style.display = 'none';
-            document.getElementById('loginPassword').value = '';
-            setTimeout(() => document.getElementById('loginPassword').focus(), 0);
-        }
-    });
-    document.getElementById('loginModalClose').addEventListener('click', function() {
-        document.getElementById('loginModal').classList.remove('active');
-    });
-    document.getElementById('loginModal').addEventListener('click', function(e) {
-        if (e.target === this) document.getElementById('loginModal').classList.remove('active');
-    });
-    document.getElementById('loginSubmit').addEventListener('click', async function() {
-        const password = document.getElementById('loginPassword').value.trim();
-        this.disabled = true;
-        try { await login(password); }
-        finally { this.disabled = false; }
-    });
-    document.getElementById('loginPassword').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') document.getElementById('loginSubmit').click();
-    });
-
     // ==========================================
-    // 3. Погода
+    // 3. ПОГОДА
     // ==========================================
     async function fetchWeather() {
         try {
@@ -1178,113 +1054,152 @@
             const data = await resp.json();
             const temp = data.current_weather.temperature;
             const code = data.current_weather.weathercode;
-            const weatherMap = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',56:'🌧️',57:'🌧️',61:'🌦️',63:'🌧️',65:'🌧️',66:'🌧️',67:'🌧️',71:'❄️',73:'❄️',75:'❄️',77:'🌨️',80:'🌦️',81:'🌧️',82:'🌧️',85:'🌨️',86:'🌨️',95:'⛈️',96:'⛈️',99:'⛈️'};
-            document.getElementById('weatherIcon').textContent = weatherMap[code] || '🌡️';
+
+            const weatherMap = {
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+                45: '🌫️', 48: '🌫️',
+                51: '🌦️', 53: '🌦️', 55: '🌧️',
+                56: '🌧️', 57: '🌧️',
+                61: '🌦️', 63: '🌧️', 65: '🌧️',
+                66: '🌧️', 67: '🌧️',
+                71: '❄️', 73: '❄️', 75: '❄️',
+                77: '🌨️',
+                80: '🌦️', 81: '🌧️', 82: '🌧️',
+                85: '🌨️', 86: '🌨️',
+                95: '⛈️', 96: '⛈️', 99: '⛈️'
+            };
+            const icon = weatherMap[code] || '🌡️';
+            let descText = 'ясно';
+            if (code >= 51 && code <= 67) descText = 'дождь';
+            else if (code >= 71 && code <= 77) descText = 'снег';
+            else if (code >= 80 && code <= 82) descText = 'ливень';
+            else if (code >= 85 && code <= 86) descText = 'снегопад';
+            else if (code >= 95) descText = 'гроза';
+            else if (code === 3 || code === 2) descText = 'облачно';
+            else if (code === 1) descText = 'переменная облачность';
+            else if (code === 0) descText = 'ясно';
+            else if (code === 45 || code === 48) descText = 'туман';
+
+            document.getElementById('weatherIcon').textContent = icon;
             document.getElementById('weatherTemp').textContent = Math.round(temp) + '°C';
+            document.getElementById('weatherDesc').textContent = descText;
         } catch(e) {
+            console.warn('Ошибка получения погоды:', e);
             document.getElementById('weatherIcon').textContent = '⚠️';
             document.getElementById('weatherTemp').textContent = '--°C';
+            document.getElementById('weatherDesc').textContent = 'недоступно';
         }
     }
     fetchWeather();
     setInterval(fetchWeather, 600000);
 
     // ==========================================
-    // 4. Часы
+    // 4. ЧАСЫ
     // ==========================================
     function updateClock() {
         const now = new Date();
-        document.getElementById('current-date').textContent = now.toLocaleDateString('ru-RU', { day:'2-digit', month:'short' });
-        document.getElementById('current-time').textContent = now.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
+        document.getElementById('current-date').textContent = now.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' });
+        document.getElementById('current-time').textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         autoThemeCheck();
     }
-    setInterval(updateClock, 10000);
-    updateClock();
 
     // ==========================================
-    // 5. Вспомогательные функции
+    // 5. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ВРЕМЕНИ И ДАТЫ
     // ==========================================
-    function normalizeDate(input) {
-        if (!input) return input;
-        const digits = input.replace(/\D/g, '');
-        if (digits.length === 8) {
-            let day = parseInt(digits.substring(0,2),10);
-            let month = parseInt(digits.substring(2,4),10);
-            let year = parseInt(digits.substring(4,8),10);
-            if (day >=1 && day<=31 && month>=1 && month<=12 && year>=1900 && year<=2100) {
-                return `${String(day).padStart(2,'0')}.${String(month).padStart(2,'0')}.${year}`;
-            }
-            let year2 = parseInt(digits.substring(0,4),10);
-            let month2 = parseInt(digits.substring(4,6),10);
-            let day2 = parseInt(digits.substring(6,8),10);
-            if (year2>=1900 && year2<=2100 && month2>=1 && month2<=12 && day2>=1 && day2<=31) {
-                return `${String(day2).padStart(2,'0')}.${String(month2).padStart(2,'0')}.${year2}`;
-            }
-        }
-        return input;
-    }
+
     function normalizeTime(input) {
         if (!input) return input;
         const digits = input.replace(/\D/g, '');
         if (digits.length === 4) {
-            const h = parseInt(digits.substring(0,2),10);
-            const m = parseInt(digits.substring(2,4),10);
-            if (h>=0 && h<24 && m>=0 && m<60) {
-                return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            const h = parseInt(digits.substring(0,2), 10);
+            const m = parseInt(digits.substring(2,4), 10);
+            if (h >= 0 && h < 24 && m >= 0 && m < 60) {
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
             }
         }
         if (/^\d{1,2}:\d{2}$/.test(input)) {
             const parts = input.split(':');
-            const h = parseInt(parts[0],10);
-            const m = parseInt(parts[1],10);
-            if (h>=0 && h<24 && m>=0 && m<60) {
-                return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            const h = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            if (h >= 0 && h < 24 && m >= 0 && m < 60) {
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
             }
         }
         return input;
     }
+
     function calculateDuration() {
-        const startVal = normalizeTime(document.getElementById('startTime').value);
-        const endVal = normalizeTime(document.getElementById('endTime').value);
+        const startField = document.getElementById('startTime');
+        const endField = document.getElementById('endTime');
+        const durationField = document.getElementById('duration');
+        const startVal = normalizeTime(startField.value);
+        const endVal = normalizeTime(endField.value);
         const startParts = startVal.match(/^(\d{2}):(\d{2})$/);
         const endParts = endVal.match(/^(\d{2}):(\d{2})$/);
         if (startParts && endParts) {
-            const startMin = parseInt(startParts[1])*60 + parseInt(startParts[2]);
-            const endMin = parseInt(endParts[1])*60 + parseInt(endParts[2]);
+            const startMin = parseInt(startParts[1]) * 60 + parseInt(startParts[2]);
+            const endMin = parseInt(endParts[1]) * 60 + parseInt(endParts[2]);
             let diff = endMin - startMin;
             if (diff < 0) diff += 1440;
-            const h = Math.floor(diff/60);
-            const m = diff%60;
-            document.getElementById('duration').value = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            const h = Math.floor(diff / 60);
+            const m = diff % 60;
+            durationField.value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
     }
 
+    function normalizeDate(input) {
+        if (!input) return input;
+        const digits = input.replace(/\D/g, '');
+        if (digits.length === 8) {
+            const day = parseInt(digits.substring(0,2), 10);
+            const month = parseInt(digits.substring(2,4), 10);
+            const year = parseInt(digits.substring(4,8), 10);
+            if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= 2100) {
+                return `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
+            }
+            const year2 = parseInt(digits.substring(0,4), 10);
+            const month2 = parseInt(digits.substring(4,6), 10);
+            const day2 = parseInt(digits.substring(6,8), 10);
+            if (year2 >= 1900 && year2 <= 2100 && month2 >= 1 && month2 <= 12 && day2 >= 1 && day2 <= 31) {
+                return `${String(day2).padStart(2, '0')}.${String(month2).padStart(2, '0')}.${year2}`;
+            }
+        }
+        return input;
+    }
+
     // ==========================================
-    // 6. Работа с записями
+    // 6. РАБОТА С ЗАПИСЯМИ (localStorage)
     // ==========================================
     const STORAGE_KEY = 'trip_records_analysis';
+
     function getRecords() {
         try {
             const data = localStorage.getItem(STORAGE_KEY);
             return data ? JSON.parse(data) : [];
-        } catch { return []; }
+        } catch {
+            return [];
+        }
     }
+
     function saveRecordsToStorage(records) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     }
+
     function addRecord(record) {
         if (record.tripDate) record.tripDate = normalizeDate(record.tripDate);
         if (record.startTime) record.startTime = normalizeTime(record.startTime);
         if (record.endTime) record.endTime = normalizeTime(record.endTime);
         if (!record.duration && record.startTime && record.endTime) {
-            const sParts = record.startTime.match(/^(\d{2}):(\d{2})$/);
-            const eParts = record.endTime.match(/^(\d{2}):(\d{2})$/);
-            if (sParts && eParts) {
-                const sMin = parseInt(sParts[1])*60 + parseInt(sParts[2]);
-                const eMin = parseInt(eParts[1])*60 + parseInt(eParts[2]);
-                let diff = eMin - sMin;
+            const startParts = record.startTime.match(/^(\d{2}):(\d{2})$/);
+            const endParts = record.endTime.match(/^(\d{2}):(\d{2})$/);
+            if (startParts && endParts) {
+                const startMin = parseInt(startParts[1]) * 60 + parseInt(startParts[2]);
+                const endMin = parseInt(endParts[1]) * 60 + parseInt(endParts[2]);
+                let diff = endMin - startMin;
                 if (diff < 0) diff += 1440;
-                record.duration = `${String(Math.floor(diff/60)).padStart(2,'0')}:${String(diff%60).padStart(2,'0')}`;
+                const h = Math.floor(diff / 60);
+                const m = diff % 60;
+                record.duration = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
             }
         }
         const records = getRecords();
@@ -1295,6 +1210,7 @@
         renderTable();
         updateStats();
     }
+
     function deleteRecord(id) {
         let records = getRecords();
         records = records.filter(r => r.id !== id);
@@ -1302,17 +1218,21 @@
         renderTable();
         updateStats();
     }
+
     function clearAllRecords() {
-        if (confirm('Удалить все записи?')) {
+        if (confirm('Удалить все сохранённые записи?')) {
             saveRecordsToStorage([]);
             renderTable();
             updateStats();
         }
     }
-    function loadRecords() { return getRecords(); }
+
+    function loadRecords() {
+        return getRecords();
+    }
 
     // ==========================================
-    // 7. Распознавание
+    // 7. РАСПОЗНАВАНИЕ И ПАРСИНГ
     // ==========================================
     function parseAndFillFields(text) {
         const fields = {
@@ -1328,56 +1248,96 @@
             fuelEnd: document.getElementById('fuelEnd'),
             fuelUsed: document.getElementById('fuelUsed')
         };
-        for (const input of Object.values(fields)) input.classList.remove('found');
-        const found = {};
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        let startLine='', endLine='', durationLine='', distanceLine='';
-        let chargeStartLine='', chargeEndLine='', fuelStartLine='', fuelEndLine='';
-        for (const line of lines) {
-            const lower = line.toLowerCase();
-            if (lower.includes('старт') || lower.includes('начало')) startLine = line;
-            else if (lower.includes('финиш') || lower.includes('конец')) endLine = line;
-            else if (lower.includes('продолжительность') || lower.includes('длительность')) durationLine = line;
-            else if (lower.includes('расстояние') || lower.includes('пробег') || lower.includes('километр')) distanceLine = line;
-            else if (lower.includes('начальный уровень заряда') || (lower.includes('заряд') && lower.includes('нач'))) chargeStartLine = line;
-            else if (lower.includes('конечный уровень заряда') || (lower.includes('заряд') && lower.includes('кон'))) chargeEndLine = line;
-            else if (lower.includes('начальный уровень топлива') || (lower.includes('топлив') && lower.includes('нач'))) fuelStartLine = line;
-            else if (lower.includes('конечный уровень топлива') || (lower.includes('топлив') && lower.includes('кон'))) fuelEndLine = line;
+
+        for (const input of Object.values(fields)) {
+            input.classList.remove('found');
         }
+
+        const found = {};
+        const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+        let startLine = '', endLine = '', durationLine = '', distanceLine = '';
+        let chargeStartLine = '', chargeEndLine = '', fuelStartLine = '', fuelEndLine = '';
+
+        for (const line of lines) {
+            const lowerLine = line.toLowerCase();
+            if (lowerLine.includes('старт') || lowerLine.includes('начало')) startLine = line;
+            else if (lowerLine.includes('финиш') || lowerLine.includes('конец')) endLine = line;
+            else if (lowerLine.includes('продолжительность') || lowerLine.includes('длительность')) durationLine = line;
+            else if (lowerLine.includes('расстояние') || lowerLine.includes('пробег') || lowerLine.includes('километр')) distanceLine = line;
+            else if (lowerLine.includes('начальный уровень заряда') || lowerLine.includes('начальный заряд') || (lowerLine.includes('заряд') && lowerLine.includes('нач'))) chargeStartLine = line;
+            else if (lowerLine.includes('конечный уровень заряда') || lowerLine.includes('конечный заряд') || (lowerLine.includes('заряд') && lowerLine.includes('кон'))) chargeEndLine = line;
+            else if (lowerLine.includes('начальный уровень топлива') || lowerLine.includes('начальный топлив') || (lowerLine.includes('топлив') && lowerLine.includes('нач'))) fuelStartLine = line;
+            else if (lowerLine.includes('конечный уровень топлива') || lowerLine.includes('конечный топлив') || (lowerLine.includes('топлив') && lowerLine.includes('кон'))) fuelEndLine = line;
+        }
+
         if (startLine) {
             let dateMatch = startLine.match(/\b(\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{4}|\d{1,2}\.\d{1,2}\.\d{4})\b/);
             if (!dateMatch) {
                 const digits = startLine.match(/\b(\d{8})\b/);
                 if (digits) {
-                    const normalized = normalizeDate(digits[1]);
-                    if (normalized && normalized !== digits[1]) found.tripDate = normalized;
+                    const raw = digits[1];
+                    const normalized = normalizeDate(raw);
+                    if (normalized && normalized !== raw) found.tripDate = normalized;
                 }
             } else {
-                found.tripDate = normalizeDate(dateMatch[0]);
-            }
-            const timeAfterComma = startLine.match(/,\s*(\d{1,2}[:.]\d{2})/);
-            if (timeAfterComma) found.startTime = normalizeTime(timeAfterComma[1].replace('.',':'));
-            else {
-                const timeMatch = startLine.match(/\b(\d{1,2}[:.]\d{2})\b/);
-                if (timeMatch) found.startTime = normalizeTime(timeMatch[0].replace('.',':'));
+                found.tripDate = dateMatch[0];
+                found.tripDate = normalizeDate(found.tripDate);
             }
         }
+
+        if (startLine) {
+            const timeAfterComma = startLine.match(/,\s*(\d{1,2}[:.]\d{2})/);
+            if (timeAfterComma) {
+                found.startTime = normalizeTime(timeAfterComma[1].replace('.', ':'));
+            } else {
+                const timePattern = /\b(\d{1,2}[:.]\d{2})\b/;
+                const timeMatch = startLine.match(timePattern);
+                if (timeMatch) {
+                    found.startTime = normalizeTime(timeMatch[0].replace('.', ':'));
+                } else {
+                    const digits = startLine.match(/\b(\d{4})\b/);
+                    if (digits) {
+                        const normalized = normalizeTime(digits[1]);
+                        if (normalized && normalized !== digits[1]) found.startTime = normalized;
+                    }
+                }
+            }
+        }
+
         if (endLine) {
             const timeAfterComma = endLine.match(/,\s*(\d{1,2}[:.]\d{2})/);
-            if (timeAfterComma) found.endTime = normalizeTime(timeAfterComma[1].replace('.',':'));
-            else {
-                const timeMatch = endLine.match(/\b(\d{1,2}[:.]\d{2})\b/);
-                if (timeMatch) found.endTime = normalizeTime(timeMatch[0].replace('.',':'));
+            if (timeAfterComma) {
+                found.endTime = normalizeTime(timeAfterComma[1].replace('.', ':'));
+            } else {
+                const timePattern = /\b(\d{1,2}[:.]\d{2})\b/;
+                const timeMatch = endLine.match(timePattern);
+                if (timeMatch) {
+                    found.endTime = normalizeTime(timeMatch[0].replace('.', ':'));
+                } else {
+                    const digits = endLine.match(/\b(\d{4})\b/);
+                    if (digits) {
+                        const normalized = normalizeTime(digits[1]);
+                        if (normalized && normalized !== digits[1]) found.endTime = normalized;
+                    }
+                }
             }
         }
+
         if (durationLine) {
             const durMatch = durationLine.match(/\b(\d{1,2}[:.]\d{2}|\d+\s*(?:мин|минут|ч|час))\b/);
-            if (durMatch) found.duration = durMatch[0].replace('.',':');
+            if (durMatch) {
+                found.duration = durMatch[0].replace('.', ':');
+            }
         }
+
         if (distanceLine) {
             const distMatch = distanceLine.match(/(\d+[.,]?\d*)\s*(?:км|km|километр)/i);
-            if (distMatch) found.distance = distMatch[1].replace(',','.');
+            if (distMatch) {
+                found.distance = distMatch[1].replace(',', '.');
+            }
         }
+
         if (chargeStartLine) {
             const p = chargeStartLine.match(/(\d+)\s*%/);
             if (p) found.chargeStart = p[1];
@@ -1386,6 +1346,7 @@
             const p = chargeEndLine.match(/(\d+)\s*%/);
             if (p) found.chargeEnd = p[1];
         }
+
         if (fuelStartLine) {
             const p = fuelStartLine.match(/(\d+)\s*%/);
             if (p) found.fuelStart = p[1];
@@ -1394,6 +1355,7 @@
             const p = fuelEndLine.match(/(\d+)\s*%/);
             if (p) found.fuelEnd = p[1];
         }
+
         if (found.chargeStart && found.chargeEnd) {
             const diff = parseFloat(found.chargeStart) - parseFloat(found.chargeEnd);
             if (!isNaN(diff) && diff >= 0) found.chargeUsed = diff.toString();
@@ -1402,6 +1364,7 @@
             const diff = parseFloat(found.fuelStart) - parseFloat(found.fuelEnd);
             if (!isNaN(diff) && diff >= 0) found.fuelUsed = diff.toString();
         }
+
         if (!found.duration && found.startTime && found.endTime) {
             const sParts = found.startTime.match(/^(\d{2}):(\d{2})$/);
             const eParts = found.endTime.match(/^(\d{2}):(\d{2})$/);
@@ -1410,9 +1373,12 @@
                 const eMin = parseInt(eParts[1])*60 + parseInt(eParts[2]);
                 let diff = eMin - sMin;
                 if (diff < 0) diff += 1440;
-                found.duration = `${String(Math.floor(diff/60)).padStart(2,'0')}:${String(diff%60).padStart(2,'0')}`;
+                const h = Math.floor(diff / 60);
+                const m = diff % 60;
+                found.duration = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
             }
         }
+
         let filledCount = 0;
         for (const [key, value] of Object.entries(found)) {
             if (fields[key] && value) {
@@ -1421,65 +1387,101 @@
                 filledCount++;
             }
         }
+
         recalculateCharge();
         recalculateFuel();
         calculateDuration();
+
         return { found, filledCount };
     }
 
+    // ==========================================
+    // 8. АВТОМАТИЧЕСКИЙ ПЕРЕСЧЁТ РАСХОДА И ПРОДОЛЖИТЕЛЬНОСТИ
+    // ==========================================
     function recalculateCharge() {
         const start = parseFloat(document.getElementById('chargeStart').value);
         const end = parseFloat(document.getElementById('chargeEnd').value);
-        const used = document.getElementById('chargeUsed');
+        const usedField = document.getElementById('chargeUsed');
         if (!isNaN(start) && !isNaN(end)) {
-            const diff = start - end;
-            if (diff >= 0) used.value = diff.toFixed(1);
-            else used.value = '';
-        } else used.value = '';
+            const used = start - end;
+            if (used >= 0) usedField.value = used.toFixed(1);
+            else usedField.value = '';
+        } else usedField.value = '';
     }
+
     function recalculateFuel() {
         const start = parseFloat(document.getElementById('fuelStart').value);
         const end = parseFloat(document.getElementById('fuelEnd').value);
-        const used = document.getElementById('fuelUsed');
+        const usedField = document.getElementById('fuelUsed');
         if (!isNaN(start) && !isNaN(end)) {
-            const diff = start - end;
-            if (diff >= 0) used.value = diff.toFixed(1);
-            else used.value = '';
-        } else used.value = '';
+            const used = start - end;
+            if (used >= 0) usedField.value = used.toFixed(1);
+            else usedField.value = '';
+        } else usedField.value = '';
     }
+
     document.getElementById('chargeStart').addEventListener('input', recalculateCharge);
     document.getElementById('chargeEnd').addEventListener('input', recalculateCharge);
     document.getElementById('fuelStart').addEventListener('input', recalculateFuel);
     document.getElementById('fuelEnd').addEventListener('input', recalculateFuel);
-    document.getElementById('startTime').addEventListener('blur', function() {
-        this.value = normalizeTime(this.value);
+
+    const startTimeInput = document.getElementById('startTime');
+    const endTimeInput = document.getElementById('endTime');
+
+    function onTimeBlur(e) {
+        e.target.value = normalizeTime(e.target.value);
         calculateDuration();
-    });
-    document.getElementById('endTime').addEventListener('blur', function() {
-        this.value = normalizeTime(this.value);
-        calculateDuration();
-    });
+    }
+    startTimeInput.addEventListener('blur', onTimeBlur);
+    endTimeInput.addEventListener('blur', onTimeBlur);
 
     // ==========================================
-    // 8. Статистика с выбором периода
+    // 9. СТАТИСТИКА С ВОЗМОЖНОСТЬЮ ВЫБОРА ПЕРИОДА ДЛЯ КАЖДОГО ВИДЖЕТА
     // ==========================================
-    const widgetPeriods = { day: { start: null, end: null }, week: { start: null, end: null }, month: { start: null, end: null } };
+    // Храним периоды для каждого виджета (в формате {start: Date, end: Date})
+    const widgetPeriods = {
+        day: { start: null, end: null },
+        week: { start: null, end: null },
+        month: { start: null, end: null }
+    };
+
+    // Установка начальных периодов
     function initWidgetPeriods() {
         const now = new Date();
-        const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
-        const todayEnd = new Date(now); todayEnd.setHours(23,59,59,999);
-        widgetPeriods.day.start = todayStart; widgetPeriods.day.end = todayEnd;
-        const weekStart = new Date(now); weekStart.setDate(weekStart.getDate()-6); weekStart.setHours(0,0,0,0);
-        const weekEnd = new Date(now); weekEnd.setHours(23,59,59,999);
-        widgetPeriods.week.start = weekStart; widgetPeriods.week.end = weekEnd;
-        const monthStart = new Date(now); monthStart.setDate(monthStart.getDate()-29); monthStart.setHours(0,0,0,0);
-        const monthEnd = new Date(now); monthEnd.setHours(23,59,59,999);
-        widgetPeriods.month.start = monthStart; widgetPeriods.month.end = monthEnd;
+        // День: сегодня
+        const todayStart = new Date(now);
+        todayStart.setHours(0,0,0,0);
+        const todayEnd = new Date(now);
+        todayEnd.setHours(23,59,59,999);
+        widgetPeriods.day.start = todayStart;
+        widgetPeriods.day.end = todayEnd;
+
+        // Неделя: последние 7 дней (включая сегодня)
+        const weekStart = new Date(now);
+        weekStart.setDate(weekStart.getDate() - 6);
+        weekStart.setHours(0,0,0,0);
+        const weekEnd = new Date(now);
+        weekEnd.setHours(23,59,59,999);
+        widgetPeriods.week.start = weekStart;
+        widgetPeriods.week.end = weekEnd;
+
+        // Месяц: последние 30 дней
+        const monthStart = new Date(now);
+        monthStart.setDate(monthStart.getDate() - 29);
+        monthStart.setHours(0,0,0,0);
+        const monthEnd = new Date(now);
+        monthEnd.setHours(23,59,59,999);
+        widgetPeriods.month.start = monthStart;
+        widgetPeriods.month.end = monthEnd;
     }
+
+    // Функция для фильтрации записей по диапазону дат (использует объекты Date)
     function filterRecordsByDateRange(records, startDate, endDate) {
         if (!startDate || !endDate) return records;
-        const start = new Date(startDate); start.setHours(0,0,0,0);
-        const end = new Date(endDate); end.setHours(23,59,59,999);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        start.setHours(0,0,0,0);
+        end.setHours(23,59,59,999);
         return records.filter(r => {
             if (!r.tripDate) return false;
             const parts = r.tripDate.split('.');
@@ -1491,157 +1493,215 @@
             return false;
         });
     }
+
+    // Обновление статистики для конкретного виджета
     function updateWidgetStats(widgetKey) {
         if (!state.authenticated) return;
         const records = getRecords();
         const period = widgetPeriods[widgetKey];
         if (!period || !period.start || !period.end) return;
+
         const filtered = filterRecordsByDateRange(records, period.start, period.end);
-        const totalDist = filtered.reduce((s,r) => s + (parseFloat(r.distance)||0), 0);
-        const totalCharge = filtered.reduce((s,r) => s + (parseFloat(r.chargeUsed)||0), 0);
-        const totalFuel = filtered.reduce((s,r) => s + (parseFloat(r.fuelUsed)||0), 0);
+        const totalDist = filtered.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+        const totalCharge = filtered.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
+        const totalFuel = filtered.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
         const count = filtered.length;
+
+        // Определяем id элементов
         const ids = {
-            day: { totalDist: 'dayTotalDist', avgCharge: 'dayAvgCharge', avgFuel: 'dayAvgFuel' },
-            week: { totalDist: 'weekTotalDist', avgCharge: 'weekAvgCharge', avgFuel: 'weekAvgFuel' },
-            month: { totalDist: 'monthTotalDist', avgCharge: 'monthAvgCharge', avgFuel: 'monthAvgFuel' }
+            day: {
+                totalDist: 'dayTotalDist',
+                avgDist: 'dayAvgDist',
+                avgCharge: 'dayAvgCharge',
+                avgFuel: 'dayAvgFuel'
+            },
+            week: {
+                totalDist: 'weekTotalDist',
+                avgDist: 'weekAvgDist',
+                avgCharge: 'weekAvgCharge',
+                avgFuel: 'weekAvgFuel'
+            },
+            month: {
+                totalDist: 'monthTotalDist',
+                avgDist: 'monthAvgDist',
+                avgCharge: 'monthAvgCharge',
+                avgFuel: 'monthAvgFuel'
+            }
         };
+
         const idMap = ids[widgetKey];
         if (!idMap) return;
+
+        const avgDist = count ? totalDist / count : 0;
         const avgCharge = count ? totalCharge / count : 0;
         const avgFuel = count ? totalFuel / count : 0;
+
         document.getElementById(idMap.totalDist).textContent = totalDist.toFixed(1) + ' км';
+        document.getElementById(idMap.avgDist).textContent = avgDist.toFixed(1) + ' км';
         document.getElementById(idMap.avgCharge).textContent = avgCharge.toFixed(1) + ' %';
         document.getElementById(idMap.avgFuel).textContent = avgFuel.toFixed(1) + ' %';
     }
-    function updateStats() {
-        if (!state.authenticated) {
-            ['dayTotalDist','dayAvgCharge','dayAvgFuel','weekTotalDist','weekAvgCharge','weekAvgFuel','monthTotalDist','monthAvgCharge','monthAvgFuel'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = '0';
-            });
-            return;
-        }
-        if (!widgetPeriods.day.start) initWidgetPeriods();
+
+    // Обновление всех виджетов
+    function updateAllWidgetStats() {
         updateWidgetStats('day');
         updateWidgetStats('week');
         updateWidgetStats('month');
     }
 
+    // Переопределяем updateStats, чтобы использовать новые функции
+    function updateStats() {
+        if (!state.authenticated) {
+            // Обнуляем виджеты
+            ['dayTotalDist','dayAvgDist','dayAvgCharge','dayAvgFuel',
+             'weekTotalDist','weekAvgDist','weekAvgCharge','weekAvgFuel',
+             'monthTotalDist','monthAvgDist','monthAvgCharge','monthAvgFuel'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '0';
+            });
+            return;
+        }
+        // Инициализируем периоды, если ещё не инициализированы
+        if (!widgetPeriods.day.start) {
+            initWidgetPeriods();
+        }
+        updateAllWidgetStats();
+    }
+
     // ==========================================
-    // 9. Таблица
+    // 10. ОТРИСОВКА ТАБЛИЦЫ
     // ==========================================
+    function renderTable() {
+        if (!state.authenticated) return;
+        let records = getRecords();
+        const tbody = document.getElementById('recordsBody');
+        
+        if (state.sortOrder === 'desc') {
+            records.sort((a, b) => {
+                const dateA = a.tripDate || '';
+                const dateB = b.tripDate || '';
+                return dateB.localeCompare(dateA);
+            });
+        } else {
+            records.sort((a, b) => {
+                const dateA = a.tripDate || '';
+                const dateB = b.tripDate || '';
+                return dateA.localeCompare(dateB);
+            });
+        }
+        
+        if (records.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-light); padding:15px;">Нет сохранённых записей</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        records.forEach(record => {
+            let chargeTooltip = '', fuelTooltip = '';
+            if (record.chargeStart || record.chargeEnd) {
+                chargeTooltip = `Начальный уровень заряда: ${record.chargeStart || '0'} %\nКонечный уровень заряда: ${record.chargeEnd || '0'} %`;
+            }
+            if (record.fuelStart || record.fuelEnd) {
+                fuelTooltip = `Начальный уровень топлива: ${record.fuelStart || '0'} %\nКонечный уровень топлива: ${record.fuelEnd || '0'} %`;
+            }
+
+            html += `
+                <tr>
+                    <td>${escapeHtml(record.tripDate || '')}</td>
+                    <td>${escapeHtml(record.startTime || '')}</td>
+                    <td>${escapeHtml(record.endTime || '')}</td>
+                    <td>${escapeHtml(record.duration || '')}</td>
+                    <td>${escapeHtml(record.distance || '')}</td>
+                    <td>
+                        ${chargeTooltip ? `
+                            <span class="tooltip-container" data-tooltip="${escapeHtml(chargeTooltip.replace(/\n/g, '<br>'))}">
+                                ${escapeHtml(record.chargeUsed || '0')}
+                            </span>
+                        ` : escapeHtml(record.chargeUsed || '0')}
+                    </td>
+                    <td>
+                        ${fuelTooltip ? `
+                            <span class="tooltip-container" data-tooltip="${escapeHtml(fuelTooltip.replace(/\n/g, '<br>'))}">
+                                ${escapeHtml(record.fuelUsed || '0')}
+                            </span>
+                        ` : escapeHtml(record.fuelUsed || '0')}
+                    </td>
+                    <td>
+                        <button class="delete-btn" data-id="${record.id}">Удалить</button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+
+        document.querySelectorAll('.tooltip-container').forEach(el => {
+            el.addEventListener('mouseenter', function(e) {
+                const text = this.getAttribute('data-tooltip');
+                if (text) showTooltipHtml(text, e.clientX, e.clientY);
+            });
+            el.addEventListener('mousemove', function(e) {
+                const text = this.getAttribute('data-tooltip');
+                if (text) showTooltipHtml(text, e.clientX, e.clientY);
+            });
+            el.addEventListener('mouseleave', hideTooltip);
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = parseInt(this.getAttribute('data-id'), 10);
+                deleteRecord(id);
+            });
+        });
+    }
+
     function escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    function renderTable() {
-        if (!state.authenticated) return;
-        let records = getRecords();
-        const tbody = document.getElementById('recordsBody');
-        if (state.sortOrder === 'desc') {
-            records.sort((a,b) => {
-                const dateA = a.tripDate || '';
-                const dateB = b.tripDate || '';
-                return dateB.localeCompare(dateA);
-            });
-        } else {
-            records.sort((a,b) => {
-                const dateA = a.tripDate || '';
-                const dateB = b.tripDate || '';
-                return dateA.localeCompare(dateB);
-            });
-        }
-        if (records.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:12px;">Нет записей</td></tr>`;
-            return;
-        }
-        let html = '';
-        records.forEach(record => {
-            let chargeTooltip = '', fuelTooltip = '';
-            if (record.chargeStart || record.chargeEnd) {
-                chargeTooltip = `Начальный заряд: ${record.chargeStart||'0'}%\nКонечный заряд: ${record.chargeEnd||'0'}%`;
-            }
-            if (record.fuelStart || record.fuelEnd) {
-                fuelTooltip = `Начальный топливо: ${record.fuelStart||'0'}%\nКонечный топливо: ${record.fuelEnd||'0'}%`;
-            }
-            html += `
-                <tr>
-                    <td>${escapeHtml(record.tripDate||'')}</td>
-                    <td>${escapeHtml(record.startTime||'')}</td>
-                    <td>${escapeHtml(record.endTime||'')}</td>
-                    <td>${escapeHtml(record.duration||'')}</td>
-                    <td>${escapeHtml(record.distance||'')}</td>
-                    <td>
-                        ${chargeTooltip ? `
-                            <span class="tooltip-container" data-tooltip="${escapeHtml(chargeTooltip.replace(/\n/g,'<br>'))}">
-                                ${escapeHtml(record.chargeUsed||'0')}
-                            </span>
-                        ` : escapeHtml(record.chargeUsed||'0')}
-                    </td>
-                    <td>
-                        ${fuelTooltip ? `
-                            <span class="tooltip-container" data-tooltip="${escapeHtml(fuelTooltip.replace(/\n/g,'<br>'))}">
-                                ${escapeHtml(record.fuelUsed||'0')}
-                            </span>
-                        ` : escapeHtml(record.fuelUsed||'0')}
-                    </td>
-                    <td><button class="delete-btn" data-id="${record.id}">✕</button></td>
-                </tr>
-            `;
-        });
-        tbody.innerHTML = html;
-        document.querySelectorAll('.tooltip-container').forEach(el => {
-            el.addEventListener('mouseenter', function(e) {
-                const text = this.dataset.tooltip;
-                if (text) showTooltipHtml(text, e.clientX, e.clientY);
-            });
-            el.addEventListener('mousemove', function(e) {
-                const text = this.dataset.tooltip;
-                if (text) showTooltipHtml(text, e.clientX, e.clientY);
-            });
-            el.addEventListener('mouseleave', hideTooltip);
-        });
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const id = parseInt(this.dataset.id, 10);
-                deleteRecord(id);
-            });
-        });
-    }
 
     // ==========================================
-    // 10. Toast
+    // 11. TOAST
     // ==========================================
     function showToast(message, type = 'success') {
         const toast = document.getElementById('toast');
         toast.textContent = message;
         toast.className = 'toast ' + type;
         setTimeout(() => toast.classList.add('show'), 10);
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        setTimeout(() => toast.classList.remove('show'), 4000);
     }
 
     // ==========================================
-    // 11. Яндекс Диск
+    // 12. ЯНДЕКС ДИСК (облако)
     // ==========================================
     const YANDEX_BACKUP_PATH = 'app:/trip_data.json';
-    function getYandexToken() { return localStorage.getItem('yandexToken') || null; }
-    function setYandexToken(token) {
-        if (token) localStorage.setItem('yandexToken', token);
-        else localStorage.removeItem('yandexToken');
+
+    function getYandexToken() {
+        return localStorage.getItem('yandexToken') || null;
     }
+
+    function setYandexToken(token) {
+        if (token) {
+            localStorage.setItem('yandexToken', token);
+        } else {
+            localStorage.removeItem('yandexToken');
+        }
+    }
+
     function showTokenModal() {
         document.getElementById('tokenModal').classList.add('active');
         document.getElementById('yandexTokenInput').value = '';
         document.getElementById('tokenError').style.display = 'none';
         document.getElementById('yandexTokenInput').focus();
     }
+
     function hideTokenModal() {
         document.getElementById('tokenModal').classList.remove('active');
     }
+
     async function checkYandexResponse(response, operation) {
         if (response.ok) return;
         if (response.status === 401) {
@@ -1656,22 +1716,34 @@
         }
         throw new Error(`Ошибка Яндекс Диска: HTTP ${response.status}.`);
     }
+
     function setCloudButtonsBusy(isBusy, activeButton, busyText) {
-        const saveBtn = document.getElementById('saveCloudBtn');
-        const loadBtn = document.getElementById('loadCloudBtn');
-        [saveBtn, loadBtn].forEach(btn => {
-            if (!btn.dataset.originalText) btn.dataset.originalText = btn.innerHTML;
-            btn.disabled = isBusy;
-            btn.innerHTML = btn === activeButton && isBusy ? busyText : btn.dataset.originalText;
+        const saveButton = document.getElementById('saveCloudBtn');
+        const loadButton = document.getElementById('loadCloudBtn');
+
+        [saveButton, loadButton].forEach(button => {
+            if (!button.dataset.originalText) {
+                button.dataset.originalText = button.innerHTML;
+            }
+            button.disabled = isBusy;
+            button.innerHTML = button === activeButton && isBusy
+                ? busyText
+                : button.dataset.originalText;
         });
     }
+
     function getCloudNetworkMessage(error) {
-        const msg = error && error.message ? error.message : String(error);
-        if (msg.includes('Failed to fetch') || msg.includes('Load failed') || msg.includes('NetworkError')) {
-            return 'Ошибка сети. Проверьте подключение к интернету.';
+        const message = error && error.message ? error.message : String(error);
+        if (
+            message.includes('Failed to fetch') ||
+            message.includes('Load failed') ||
+            message.includes('NetworkError')
+        ) {
+            return 'Не удалось выполнить сетевой запрос. Откройте файл через localhost или HTTPS и проверьте VPN, блокировщики и подключение к интернету.';
         }
-        return msg;
+        return message;
     }
+
     async function saveToYandexDisk(data) {
         const token = getYandexToken();
         if (!token) {
@@ -1680,14 +1752,23 @@
             return false;
         }
         try {
-            showToast('⏳ Сохраняю...', 'warning');
+            showToast('⏳ Сохраняю данные на Яндекс Диск...', 'warning');
             const uploadUrlResponse = await fetch(
-                'https://cloud-api.yandex.net/v1/disk/resources/upload?path=' + encodeURIComponent(YANDEX_BACKUP_PATH) + '&overwrite=true',
-                { method: 'GET', headers: { 'Authorization': `OAuth ${token}` } }
+                'https://cloud-api.yandex.net/v1/disk/resources/upload?path=' +
+                encodeURIComponent(YANDEX_BACKUP_PATH) +
+                '&overwrite=true',
+                {
+                    method: 'GET',
+                    headers: { 'Authorization': `OAuth ${token}` }
+                }
             );
             await checkYandexResponse(uploadUrlResponse, 'save');
+
             const uploadInfo = await uploadUrlResponse.json();
-            if (!uploadInfo.href) throw new Error('Яндекс Диск не вернул ссылку для загрузки файла.');
+            if (!uploadInfo.href) {
+                throw new Error('Яндекс Диск не вернул ссылку для загрузки файла.');
+            }
+
             const uploadResponse = await fetch(uploadInfo.href, {
                 method: 'PUT',
                 mode: 'cors',
@@ -1697,16 +1778,21 @@
                 headers: { 'Content-Type': 'application/json; charset=utf-8' },
                 body: JSON.stringify(data, null, 2)
             });
-            if (!uploadResponse.ok) throw new Error(`Не удалось сохранить файл: HTTP ${uploadResponse.status}.`);
-            showToast('✅ Данные сохранены!', 'success');
+            if (!uploadResponse.ok) {
+                throw new Error(`Не удалось сохранить файл: HTTP ${uploadResponse.status}.`);
+            }
+            showToast('✅ Данные сохранены в Яндекс Диск!', 'success');
             return true;
         } catch (error) {
             console.error('Ошибка сохранения:', error);
             showToast('❌ Сохранение не выполнено: ' + getCloudNetworkMessage(error), 'error');
-            if (!getYandexToken()) showTokenModal();
+            if (!getYandexToken()) {
+                showTokenModal();
+            }
             return false;
         }
     }
+
     async function loadFromYandexDisk() {
         const token = getYandexToken();
         if (!token) {
@@ -1714,15 +1800,24 @@
             showTokenModal();
             return null;
         }
+
         try {
-            showToast('⏳ Загружаю...', 'warning');
+            showToast('⏳ Загружаю данные с Яндекс Диска...', 'warning');
             const downloadUrlResponse = await fetch(
-                'https://cloud-api.yandex.net/v1/disk/resources/download?path=' + encodeURIComponent(YANDEX_BACKUP_PATH),
-                { method: 'GET', headers: { 'Authorization': `OAuth ${token}` } }
+                'https://cloud-api.yandex.net/v1/disk/resources/download?path=' +
+                encodeURIComponent(YANDEX_BACKUP_PATH),
+                {
+                    method: 'GET',
+                    headers: { 'Authorization': `OAuth ${token}` }
+                }
             );
             await checkYandexResponse(downloadUrlResponse, 'load');
+
             const downloadInfo = await downloadUrlResponse.json();
-            if (!downloadInfo.href) throw new Error('Яндекс Диск не вернул ссылку для скачивания файла.');
+            if (!downloadInfo.href) {
+                throw new Error('Яндекс Диск не вернул ссылку для скачивания файла.');
+            }
+
             const fileResponse = await fetch(downloadInfo.href, {
                 method: 'GET',
                 mode: 'cors',
@@ -1730,102 +1825,121 @@
                 referrerPolicy: 'no-referrer',
                 cache: 'no-store'
             });
-            if (!fileResponse.ok) throw new Error(`Не удалось скачать резервную копию: HTTP ${fileResponse.status}.`);
+            if (!fileResponse.ok) {
+                throw new Error(`Не удалось скачать резервную копию: HTTP ${fileResponse.status}.`);
+            }
+
             let data;
-            try { data = await fileResponse.json(); }
-            catch (parseError) { throw new Error('Файл не является корректным JSON-файлом.'); }
-            showToast('✅ Данные загружены!', 'success');
+            try {
+                data = await fileResponse.json();
+            } catch (parseError) {
+                throw new Error('Файл резервной копии не является корректным JSON-файлом.');
+            }
+            showToast('✅ Данные загружены с Яндекс Диска!', 'success');
             return data;
         } catch (error) {
             console.error('Ошибка загрузки:', error);
             showToast('❌ Загрузка не выполнена: ' + getCloudNetworkMessage(error), 'error');
-            if (!getYandexToken()) showTokenModal();
+            if (!getYandexToken()) {
+                showTokenModal();
+            }
             return null;
         }
     }
+
     function getCurrentData() {
-        return { version: '1.0', exported: new Date().toISOString(), records: getRecords() };
+        return {
+            version: '1.0',
+            exported: new Date().toISOString(),
+            records: getRecords()
+        };
     }
+
     function applyCloudData(data) {
-        if (!data.records || !Array.isArray(data.records)) throw new Error('Неверный формат данных');
+        if (!data.records || !Array.isArray(data.records)) {
+            throw new Error('Неверный формат данных');
+        }
         saveRecordsToStorage(data.records);
         renderTable();
         updateStats();
         showToast(`✅ Загружено ${data.records.length} записей`, 'success');
     }
 
-    document.getElementById('tokenModalClose').addEventListener('click', hideTokenModal);
-    document.getElementById('tokenModal').addEventListener('click', function(e) {
-        if (e.target === this) hideTokenModal();
-    });
-    document.getElementById('tokenSubmit').addEventListener('click', function() {
-        const token = document.getElementById('yandexTokenInput').value.trim();
-        if (!token) {
-            document.getElementById('tokenError').style.display = 'block';
-            return;
-        }
-        document.getElementById('tokenError').style.display = 'none';
-        setYandexToken(token);
-        hideTokenModal();
-        showToast('✅ Токен сохранён', 'success');
-        if (window._pendingCloudAction) {
-            const action = window._pendingCloudAction;
-            window._pendingCloudAction = null;
-            if (action === 'save') saveToYandexDisk(getCurrentData());
-            else if (action === 'load') {
-                loadFromYandexDisk().then(data => { if (data) applyCloudData(data); });
-            }
-        }
-    });
-    document.getElementById('yandexTokenInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') document.getElementById('tokenSubmit').click();
-    });
-
     // ==========================================
-    // 12. Диаграмма
+    // 13. ДИАГРАММА
     // ==========================================
     let chartInstance = null;
+
     function openChartModal() {
-        if (!state.authenticated) { showToast('Требуется авторизация', 'warning'); return; }
+        if (!state.authenticated) {
+            showToast('Требуется авторизация', 'warning');
+            return;
+        }
         const records = getRecords();
-        if (records.length === 0) { showToast('Нет данных для диаграммы', 'warning'); return; }
+        if (records.length === 0) {
+            showToast('Нет данных для построения диаграммы', 'warning');
+            return;
+        }
         document.getElementById('chartModal').classList.add('active');
+        // Инициализируем даты по умолчанию (сегодня)
         const now = new Date();
-        const start = new Date(now); start.setDate(start.getDate()-29);
+        const start = new Date(now);
+        start.setDate(start.getDate() - 29);
         document.getElementById('startDate').value = formatDateForInput(start);
         document.getElementById('endDate').value = formatDateForInput(now);
         setPeriod('today');
         renderChart(records);
     }
+
     function closeChartModal() {
         document.getElementById('chartModal').classList.remove('active');
-        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+        if (chartInstance) {
+            chartInstance.destroy();
+            chartInstance = null;
+        }
     }
+
+    // Функция для форматирования даты в YYYY-MM-DD
     function formatDateForInput(date) {
         const d = new Date(date);
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${year}-${month}-${day}`;
     }
+
     function setPeriod(period) {
         const now = new Date();
         const startDateInput = document.getElementById('startDate');
         const endDateInput = document.getElementById('endDate');
         const dateRange = document.getElementById('dateRange');
         const buttons = document.querySelectorAll('.period-selector button');
-        buttons.forEach(b => b.classList.remove('active'));
+
+        buttons.forEach(btn => btn.classList.remove('active'));
+
         let start = null, end = null;
+
         if (period === 'today') {
-            start = new Date(now); start.setHours(0,0,0,0);
-            end = new Date(now); end.setHours(23,59,59,999);
+            start = new Date(now);
+            start.setHours(0,0,0,0);
+            end = new Date(now);
+            end.setHours(23,59,59,999);
             dateRange.style.display = 'none';
             document.querySelector('[data-period="today"]').classList.add('active');
         } else if (period === 'week') {
-            start = new Date(now); start.setDate(start.getDate()-6); start.setHours(0,0,0,0);
-            end = new Date(now); end.setHours(23,59,59,999);
+            start = new Date(now);
+            start.setDate(start.getDate() - 6);
+            start.setHours(0,0,0,0);
+            end = new Date(now);
+            end.setHours(23,59,59,999);
             dateRange.style.display = 'none';
             document.querySelector('[data-period="week"]').classList.add('active');
         } else if (period === 'month') {
-            start = new Date(now); start.setDate(start.getDate()-29); start.setHours(0,0,0,0);
-            end = new Date(now); end.setHours(23,59,59,999);
+            start = new Date(now);
+            start.setDate(start.getDate() - 29);
+            start.setHours(0,0,0,0);
+            end = new Date(now);
+            end.setHours(23,59,59,999);
             dateRange.style.display = 'none';
             document.querySelector('[data-period="month"]').classList.add('active');
         } else if (period === 'custom') {
@@ -1834,14 +1948,19 @@
             const startVal = startDateInput.value;
             const endVal = endDateInput.value;
             if (startVal && endVal) {
-                start = new Date(startVal); start.setHours(0,0,0,0);
-                end = new Date(endVal); end.setHours(23,59,59,999);
+                start = new Date(startVal);
+                start.setHours(0,0,0,0);
+                end = new Date(endVal);
+                end.setHours(23,59,59,999);
             }
         }
+
         if (period !== 'custom') {
             if (start) startDateInput.value = formatDateForInput(start);
             if (end) endDateInput.value = formatDateForInput(end);
         }
+
+        // Перерисовываем диаграмму
         const startVal = startDateInput.value;
         const endVal = endDateInput.value;
         const records = getRecords();
@@ -1849,57 +1968,69 @@
         renderChart(filtered);
         updateSummary(filtered);
     }
+
     function updateSummary(filtered) {
-        const totalDist = filtered.reduce((s,r) => s + (parseFloat(r.distance)||0), 0);
-        const totalCharge = filtered.reduce((s,r) => s + (parseFloat(r.chargeUsed)||0), 0);
-        const totalFuel = filtered.reduce((s,r) => s + (parseFloat(r.fuelUsed)||0), 0);
+        const totalDist = filtered.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+        const totalCharge = filtered.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
+        const totalFuel = filtered.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
         const count = filtered.length;
         document.getElementById('sumDist').textContent = totalDist.toFixed(1) + ' км';
         document.getElementById('sumCharge').textContent = totalCharge.toFixed(1) + ' %';
         document.getElementById('sumFuel').textContent = totalFuel.toFixed(1) + ' %';
         document.getElementById('sumCount').textContent = count;
     }
+
     function renderChart(records) {
         const grouped = {};
         records.forEach(r => {
             if (!r.tripDate) return;
             const date = r.tripDate;
-            if (!grouped[date]) grouped[date] = { distance: 0, charge: 0, fuel: 0 };
+            if (!grouped[date]) {
+                grouped[date] = { distance: 0, charge: 0, fuel: 0 };
+            }
             grouped[date].distance += parseFloat(r.distance) || 0;
             grouped[date].charge += parseFloat(r.chargeUsed) || 0;
             grouped[date].fuel += parseFloat(r.fuelUsed) || 0;
         });
-        const sortedDates = Object.keys(grouped).sort((a,b) => {
-            const partsA = a.split('.'), partsB = b.split('.');
-            if (partsA.length===3 && partsB.length===3) {
+
+        const sortedDates = Object.keys(grouped).sort((a, b) => {
+            const partsA = a.split('.');
+            const partsB = b.split('.');
+            if (partsA.length === 3 && partsB.length === 3) {
                 const dA = new Date(partsA[2], partsA[1]-1, partsA[0]);
                 const dB = new Date(partsB[2], partsB[1]-1, partsB[0]);
                 return dA - dB;
             }
             return a.localeCompare(b);
         });
+
         const labels = sortedDates;
         const distData = sortedDates.map(d => grouped[d].distance);
         const chargeData = sortedDates.map(d => grouped[d].charge);
         const fuelData = sortedDates.map(d => grouped[d].fuel);
+
         const ctx = document.getElementById('chartCanvas').getContext('2d');
         if (chartInstance) chartInstance.destroy();
-        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#1c1c1e';
-        const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim() || '#e5e5ea';
+
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#0b1a33';
+        const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-grid-color').trim() || '#dce3ef';
+
         const showDist = document.getElementById('chkDistance').checked;
         const showCharge = document.getElementById('chkCharge').checked;
         const showFuel = document.getElementById('chkFuel').checked;
         const chartType = document.querySelector('input[name="chartType"]:checked').value;
         const showAvg = document.getElementById('chkAvg').checked;
+
         const datasets = [];
         const avgDist = distData.length ? distData.reduce((a,b)=>a+b,0)/distData.length : 0;
         const avgCharge = chargeData.length ? chargeData.reduce((a,b)=>a+b,0)/chargeData.length : 0;
         const avgFuel = fuelData.length ? fuelData.reduce((a,b)=>a+b,0)/fuelData.length : 0;
+
         if (showDist) {
             datasets.push({
                 label: 'Пробег, км',
                 data: distData,
-                backgroundColor: 'rgba(74,123,196,0.7)',
+                backgroundColor: 'rgba(74, 123, 196, 0.7)',
                 borderColor: '#4a7bc4',
                 borderWidth: 1,
                 yAxisID: 'y',
@@ -1908,9 +2039,9 @@
         }
         if (showCharge) {
             datasets.push({
-                label: 'Заряд, %',
+                label: 'Расход зарядки, %',
                 data: chargeData,
-                backgroundColor: 'rgba(46,204,113,0.7)',
+                backgroundColor: 'rgba(46, 204, 113, 0.7)',
                 borderColor: '#2ecc71',
                 borderWidth: 1,
                 yAxisID: 'y1',
@@ -1919,15 +2050,16 @@
         }
         if (showFuel) {
             datasets.push({
-                label: 'Топливо, %',
+                label: 'Расход топлива, %',
                 data: fuelData,
-                backgroundColor: 'rgba(230,126,34,0.7)',
+                backgroundColor: 'rgba(230, 126, 34, 0.7)',
                 borderColor: '#e67e22',
                 borderWidth: 1,
                 yAxisID: 'y1',
                 type: chartType,
             });
         }
+
         if (showAvg) {
             if (showDist && distData.length) {
                 datasets.push({
@@ -1969,9 +2101,16 @@
                 });
             }
         }
+
         if (datasets.length === 0) {
-            datasets.push({ label: 'Нет данных', data: [], backgroundColor: 'transparent', borderColor: 'transparent' });
+            datasets.push({
+                label: 'Нет данных для отображения',
+                data: [],
+                backgroundColor: 'transparent',
+                borderColor: 'transparent',
+            });
         }
+
         chartInstance = new Chart(ctx, {
             type: chartType,
             data: { labels, datasets },
@@ -1980,7 +2119,7 @@
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { display: datasets.length > 0 && datasets[0].label !== 'Нет данных' },
+                    legend: { display: datasets.length > 0 && datasets[0].label !== 'Нет данных для отображения' },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -1992,28 +2131,42 @@
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { color: textColor, maxRotation: 45, font: { size: 9 } }
+                        ticks: {
+                            color: textColor,
+                            maxRotation: 45,
+                            font: { size: 10 }
+                        }
                     },
                     y: {
                         type: 'linear',
                         position: 'left',
                         beginAtZero: true,
                         grid: { color: gridColor },
-                        ticks: { color: textColor, font: { size: 9 } },
-                        title: { display: showDist, text: 'Пробег, км', color: textColor }
+                        ticks: { color: textColor, font: { size: 10 } },
+                        title: {
+                            display: showDist,
+                            text: 'Пробег, км',
+                            color: textColor
+                        }
                     },
                     y1: {
                         type: 'linear',
                         position: 'right',
                         beginAtZero: true,
                         grid: { drawOnChartArea: false },
-                        ticks: { color: textColor, font: { size: 9 } },
-                        title: { display: showCharge || showFuel, text: 'Расход, %', color: textColor }
+                        ticks: { color: textColor, font: { size: 10 } },
+                        title: {
+                            display: showCharge || showFuel,
+                            text: 'Расход, %',
+                            color: textColor
+                        }
                     }
                 }
             }
         });
     }
+
+    // Обработчики для диаграммы
     document.querySelectorAll('.period-selector button[data-period]').forEach(btn => {
         btn.addEventListener('click', function() {
             const period = this.dataset.period;
@@ -2034,10 +2187,14 @@
             }
         });
     });
+
     document.getElementById('applyRangeBtn').addEventListener('click', function() {
         const startVal = document.getElementById('startDate').value;
         const endVal = document.getElementById('endDate').value;
-        if (!startVal || !endVal) { showToast('Выберите обе даты', 'warning'); return; }
+        if (!startVal || !endVal) {
+            showToast('Выберите обе даты', 'warning');
+            return;
+        }
         document.querySelectorAll('.period-selector button').forEach(b => b.classList.remove('active'));
         document.querySelector('[data-period="custom"]').classList.add('active');
         const records = getRecords();
@@ -2045,6 +2202,7 @@
         renderChart(filtered);
         updateSummary(filtered);
     });
+
     document.querySelectorAll('#chkDistance, #chkCharge, #chkFuel, #chkAvg, input[name="chartType"]').forEach(el => {
         el.addEventListener('change', function() {
             const startVal = document.getElementById('startDate').value;
@@ -2056,9 +2214,10 @@
     });
 
     // ==========================================
-    // 13. Выбор периода для виджетов
+    // 14. ВЫБОР ПЕРИОДА ДЛЯ ВИДЖЕТОВ
     // ==========================================
-    let currentPickerTarget = null;
+    let currentPickerTarget = null; // 'day', 'week', 'month'
+
     function openPeriodPicker(target) {
         currentPickerTarget = target;
         const period = widgetPeriods[target];
@@ -2066,57 +2225,120 @@
             document.getElementById('periodPickerStart').value = formatDateForInput(period.start);
             document.getElementById('periodPickerEnd').value = formatDateForInput(period.end);
         } else {
+            // Если период не инициализирован, используем сегодня
             const now = new Date();
             document.getElementById('periodPickerStart').value = formatDateForInput(now);
             document.getElementById('periodPickerEnd').value = formatDateForInput(now);
         }
         document.getElementById('periodPickerModal').classList.add('active');
     }
+
     document.getElementById('periodPickerClose').addEventListener('click', function() {
         document.getElementById('periodPickerModal').classList.remove('active');
     });
     document.getElementById('periodPickerModal').addEventListener('click', function(e) {
-        if (e.target === this) document.getElementById('periodPickerModal').classList.remove('active');
+        if (e.target === this) {
+            document.getElementById('periodPickerModal').classList.remove('active');
+        }
     });
+
     document.getElementById('periodPickerApply').addEventListener('click', function() {
         const startVal = document.getElementById('periodPickerStart').value;
         const endVal = document.getElementById('periodPickerEnd').value;
-        if (!startVal || !endVal) { showToast('Выберите обе даты', 'warning'); return; }
+        if (!startVal || !endVal) {
+            showToast('Выберите обе даты', 'warning');
+            return;
+        }
         const start = new Date(startVal);
         const end = new Date(endVal);
-        start.setHours(0,0,0,0); end.setHours(23,59,59,999);
-        if (start > end) { showToast('Дата начала не может быть позже окончания', 'warning'); return; }
+        start.setHours(0,0,0,0);
+        end.setHours(23,59,59,999);
+        if (start > end) {
+            showToast('Дата начала не может быть позже даты окончания', 'warning');
+            return;
+        }
         if (currentPickerTarget) {
             widgetPeriods[currentPickerTarget].start = start;
             widgetPeriods[currentPickerTarget].end = end;
             updateWidgetStats(currentPickerTarget);
             document.getElementById('periodPickerModal').classList.remove('active');
-            showToast(`Период обновлён`, 'success');
+            showToast(`Период для виджета "${currentPickerTarget}" обновлён`, 'success');
         }
     });
+
+    // Обработчики кликов на иконки календаря
     document.querySelectorAll('.period-picker').forEach(el => {
         el.addEventListener('click', function(e) {
             e.stopPropagation();
             const target = this.dataset.target;
-            if (target) openPeriodPicker(target);
+            if (target) {
+                openPeriodPicker(target);
+            }
         });
     });
 
     // ==========================================
-    // 14. Обработчики событий
+    // 15. ОБРАБОТЧИКИ СОБЫТИЙ
     // ==========================================
+    document.getElementById('loginBtn').addEventListener('click', function() {
+        if (state.authenticated) {
+            logout();
+        } else {
+            updateLoginModalMode();
+            document.getElementById('loginModal').classList.add('active');
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginPassword').value = '';
+            setTimeout(() => document.getElementById('loginPassword').focus(), 0);
+        }
+    });
+
+    document.getElementById('loginModalClose').addEventListener('click', function() {
+        document.getElementById('loginModal').classList.remove('active');
+    });
+
+    document.getElementById('loginModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+    });
+
+    document.getElementById('loginSubmit').addEventListener('click', async function() {
+        const password = document.getElementById('loginPassword').value.trim();
+        this.disabled = true;
+        try {
+            await login(password);
+        } finally {
+            this.disabled = false;
+        }
+    });
+
+    document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('loginSubmit').click();
+        }
+    });
+
     document.getElementById('settingsBtn').addEventListener('click', function() {
         document.getElementById('settingsModal').classList.add('active');
         const currentToken = getYandexToken();
-        document.getElementById('yandexTokenInputSettings').value = currentToken ? '••••••••••••••••' : '';
+        if (currentToken) {
+            document.getElementById('yandexTokenInputSettings').value = '••••••••••••••••';
+        } else {
+            document.getElementById('yandexTokenInputSettings').value = '';
+        }
         document.getElementById('tokenSettingsError').style.display = 'none';
     });
+
     document.getElementById('settingsClose').addEventListener('click', function() {
         document.getElementById('settingsModal').classList.remove('active');
     });
+
     document.getElementById('settingsModal').addEventListener('click', function(e) {
-        if (e.target === this) document.getElementById('settingsModal').classList.remove('active');
+        if (e.target === this) {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
     });
+
     document.getElementById('saveTokenSettingsBtn').addEventListener('click', function() {
         const token = document.getElementById('yandexTokenInputSettings').value.trim();
         if (!token || token === '••••••••••••••••') {
@@ -2129,6 +2351,7 @@
         document.getElementById('settingsModal').classList.remove('active');
         showToast('✅ Токен сохранён', 'success');
     });
+
     document.getElementById('resetTokenSettingsBtn').addEventListener('click', function() {
         setYandexToken(null);
         document.getElementById('yandexTokenInputSettings').value = '';
@@ -2136,22 +2359,72 @@
         showToast('🔄 Токен сброшен', 'warning');
     });
 
+    document.getElementById('tokenModalClose').addEventListener('click', hideTokenModal);
+    document.getElementById('tokenModal').addEventListener('click', function(e) {
+        if (e.target === this) hideTokenModal();
+    });
+
+    document.getElementById('tokenSubmit').addEventListener('click', function() {
+        const token = document.getElementById('yandexTokenInput').value.trim();
+        if (!token) {
+            document.getElementById('tokenError').style.display = 'block';
+            return;
+        }
+        document.getElementById('tokenError').style.display = 'none';
+        setYandexToken(token);
+        hideTokenModal();
+        showToast('✅ Токен сохранён', 'success');
+        if (window._pendingCloudAction) {
+            const action = window._pendingCloudAction;
+            window._pendingCloudAction = null;
+            if (action === 'save') {
+                saveToYandexDisk(getCurrentData());
+            } else if (action === 'load') {
+                loadFromYandexDisk().then(data => {
+                    if (data) applyCloudData(data);
+                });
+            }
+        }
+    });
+
+    document.getElementById('yandexTokenInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('tokenSubmit').click();
+        }
+    });
+
     document.getElementById('saveCloudBtn').addEventListener('click', async function() {
-        if (!state.authenticated) { showToast('Требуется авторизация', 'warning'); return; }
+        if (!state.authenticated) {
+            showToast('Требуется авторизация', 'warning');
+            return;
+        }
         const button = this;
         setCloudButtonsBusy(true, button, '⏳ Сохранение...');
-        try { await saveToYandexDisk(getCurrentData()); }
-        finally { setCloudButtonsBusy(false); }
+        try {
+            await saveToYandexDisk(getCurrentData());
+        } finally {
+            setCloudButtonsBusy(false);
+        }
     });
+
     document.getElementById('loadCloudBtn').addEventListener('click', async function() {
-        if (!state.authenticated) { showToast('Требуется авторизация', 'warning'); return; }
+        if (!state.authenticated) {
+            showToast('Требуется авторизация', 'warning');
+            return;
+        }
         const button = this;
         setCloudButtonsBusy(true, button, '⏳ Загрузка...');
         try {
             const data = await loadFromYandexDisk();
-            if (data) applyCloudData(data);
-        } catch (error) { console.error('Ошибка применения данных:', error); }
-        finally { setCloudButtonsBusy(false); }
+            if (data) {
+                applyCloudData(data);
+            }
+        } catch (error) {
+            console.error('Ошибка применения данных:', error);
+            showToast('❌ Данные не применены: ' + error.message, 'error');
+        } finally {
+            setCloudButtonsBusy(false);
+        }
     });
 
     document.getElementById('sortDateBtn').addEventListener('click', function() {
@@ -2159,6 +2432,7 @@
         this.textContent = state.sortOrder === 'desc' ? '⬇' : '⬆';
         renderTable();
     });
+
     document.getElementById('chartBtn').addEventListener('click', openChartModal);
     document.getElementById('chartModalClose').addEventListener('click', closeChartModal);
     document.getElementById('chartModal').addEventListener('click', function(e) {
@@ -2168,16 +2442,13 @@
     // Распознавание
     let currentFile = null;
     const imageInput = document.getElementById('imageInput');
+
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             currentFile = file;
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                document.getElementById('previewContainer').innerHTML = `<img src="${ev.target.result}" class="preview-img">`;
-            };
-            reader.readAsDataURL(file);
-            document.getElementById('statusMessage').textContent = '✅ Изображение загружено';
+            document.getElementById('previewContainer').innerHTML = '';
+            document.getElementById('statusMessage').textContent = '✅ Изображение загружено. Нажмите "Распознать"';
             document.getElementById('statusMessage').className = 'status success';
         } else {
             currentFile = null;
@@ -2186,12 +2457,14 @@
             document.getElementById('statusMessage').className = 'status';
         }
     });
+
     document.getElementById('recognizeBtn').addEventListener('click', async function() {
         if (!currentFile) {
-            document.getElementById('statusMessage').textContent = '⚠️ Сначала выберите изображение';
+            document.getElementById('statusMessage').textContent = '⚠️ Сначала выберите изображение.';
             document.getElementById('statusMessage').className = 'status error';
             return;
         }
+
         this.disabled = true;
         this.textContent = '⏳ Распознавание...';
         document.getElementById('statusMessage').textContent = '⏳ Идёт распознавание...';
@@ -2199,19 +2472,22 @@
         document.getElementById('ocrText').value = '';
         document.getElementById('ocrStatus').textContent = '⏳';
         document.getElementById('debugLog').textContent = '📋 Лог распознавания...';
+
         try {
             const result = await Tesseract.recognize(
                 currentFile,
                 'rus+eng',
                 {
                     tessedit_pageseg_mode: '6',
-                    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя.,:;()-+% '
+                    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя.,:;()-+% ',
                 }
             );
+
             const text = result.data.text;
             document.getElementById('ocrText').value = text;
             document.getElementById('ocrStatus').textContent = '✅ Распознано';
             document.getElementById('debugLog').textContent = '📋 Лог распознавания...\n📄 Текст распознан успешно';
+
             const { filledCount } = parseAndFillFields(text);
             document.getElementById('statusMessage').textContent = `✅ Заполнено ${filledCount} полей. Проверьте и сохраните.`;
             document.getElementById('statusMessage').className = 'status success';
@@ -2224,12 +2500,16 @@
             document.getElementById('debugLog').textContent = '📋 Лог распознавания...\n❌ Ошибка: ' + error.message;
         } finally {
             this.disabled = false;
-            this.textContent = '🚀 Распознать';
+            this.textContent = '🚀 Распознать и заполнить';
         }
     });
 
     document.getElementById('saveBtn').addEventListener('click', function() {
-        if (!state.authenticated) { showToast('Требуется авторизация', 'warning'); return; }
+        if (!state.authenticated) {
+            showToast('Требуется авторизация', 'warning');
+            return;
+        }
+
         const fields = {
             tripDate: document.getElementById('tripDate'),
             startTime: document.getElementById('startTime'),
@@ -2243,6 +2523,7 @@
             fuelEnd: document.getElementById('fuelEnd'),
             fuelUsed: document.getElementById('fuelUsed')
         };
+
         const record = {};
         let hasData = false;
         for (const [key, input] of Object.entries(fields)) {
@@ -2250,7 +2531,12 @@
             record[key] = val;
             if (val) hasData = true;
         }
-        if (!hasData) { alert('Заполните хотя бы одно поле'); return; }
+
+        if (!hasData) {
+            alert('Заполните хотя бы одно поле перед сохранением.');
+            return;
+        }
+
         if (record.tripDate) record.tripDate = normalizeDate(record.tripDate);
         if (record.startTime) record.startTime = normalizeTime(record.startTime);
         if (record.endTime) record.endTime = normalizeTime(record.endTime);
@@ -2262,9 +2548,12 @@
                 const eMin = parseInt(eParts[1])*60 + parseInt(eParts[2]);
                 let diff = eMin - sMin;
                 if (diff < 0) diff += 1440;
-                record.duration = `${String(Math.floor(diff/60)).padStart(2,'0')}:${String(diff%60).padStart(2,'0')}`;
+                const h = Math.floor(diff / 60);
+                const m = diff % 60;
+                record.duration = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
             }
         }
+
         addRecord(record);
         for (const input of Object.values(fields)) {
             input.value = '';
@@ -2276,27 +2565,42 @@
     });
 
     document.getElementById('clearFieldsBtn').addEventListener('click', function() {
-        ['tripDate','startTime','endTime','duration','distance','chargeStart','chargeEnd','chargeUsed','fuelStart','fuelEnd','fuelUsed'].forEach(id => {
+        const fields = ['tripDate', 'startTime', 'endTime', 'duration', 'distance', 'chargeStart', 'chargeEnd', 'chargeUsed', 'fuelStart', 'fuelEnd', 'fuelUsed'];
+        fields.forEach(id => {
             const el = document.getElementById(id);
-            if (el) { el.value = ''; el.classList.remove('found'); }
+            if (el) {
+                el.value = '';
+                el.classList.remove('found');
+            }
         });
         recalculateCharge();
         recalculateFuel();
         calculateDuration();
     });
+
     document.getElementById('clearAllBtn').addEventListener('click', clearAllRecords);
 
     // ==========================================
-    // 15. Инициализация
+    // 16. ИНИЦИАЛИЗАЦИЯ
     // ==========================================
     function init() {
         loadSettings();
         autoThemeCheck();
+
         state.authenticated = false;
         updateAuthUI();
-        initWidgetPeriods();
+
         updateClock();
+        setInterval(updateClock, 10000);
+
+        // Инициализируем периоды виджетов
+        initWidgetPeriods();
+        // Если авторизованы, обновим статистику
+        if (state.authenticated) {
+            updateStats();
+        }
     }
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
