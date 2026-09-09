@@ -243,7 +243,7 @@
 
         .login-error { color:var(--change-negative); font-size:0.85rem; margin-top:8px; display:none; }
 
-        /* ===== Форма данных поездки ===== */
+        /* ===== Форма данных поездки (все поля) ===== */
         .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin:10px 0; }
         .form-group { display:flex; flex-direction:column; gap:3px; }
         .form-group label { font-weight:600; font-size:0.78rem; color:var(--text-secondary); white-space:nowrap; }
@@ -253,6 +253,7 @@
         }
         .form-group input:focus { border-color:var(--btn-primary); box-shadow:0 0 0 2px var(--btn-primary)30; }
         .form-group input.found { background:#d5f5e3; border-color:var(--change-positive); }
+        .form-group input[readonly] { background:var(--bg-widget); }
 
         /* ===== Кнопки ===== */
         button {
@@ -423,7 +424,7 @@
         <span id="authStatus" class="auth-status unauthorized">🔒 Требуется вход</span>
     </div>
 
-    <!-- Виджеты статистики (групповые) -->
+    <!-- Виджеты статистики -->
     <div class="widget-row" id="statWidgets">
         <div class="stat-widget" id="statDay">
             <div class="stat-header">📅 За день</div>
@@ -462,7 +463,7 @@
         <div class="container">
             <h3>📸 1. Загрузите скриншот</h3>
             <div class="flex-row">
-                <input type="file" id="imageInput" accept="image/*" capture="environment">
+                <input type="file" id="imageInput" accept="image/*">
                 <button id="recognizeBtn">🚀 Распознать и заполнить</button>
             </div>
             <div id="previewContainer"></div>
@@ -498,29 +499,29 @@
                     <label for="distance">📏 Расстояние, км</label>
                     <input type="text" id="distance" placeholder="12.5">
                 </div>
-                <div class="form-group" style="display:none;">
-                    <label for="chargeStart">🔋 Нач. зарядка, %</label>
+                <div class="form-group">
+                    <label for="chargeStart">🔋 Начальный уровень заряда, %</label>
                     <input type="text" id="chargeStart" placeholder="85">
                 </div>
-                <div class="form-group" style="display:none;">
-                    <label for="chargeEnd">🔋 Кон. зарядка, %</label>
+                <div class="form-group">
+                    <label for="chargeEnd">🔋 Конечный уровень заряда, %</label>
                     <input type="text" id="chargeEnd" placeholder="60">
                 </div>
                 <div class="form-group">
                     <label for="chargeUsed">⚡ Израсходовано зарядки, %</label>
-                    <input type="text" id="chargeUsed" placeholder="25" readonly style="background:var(--bg-widget);">
+                    <input type="text" id="chargeUsed" placeholder="25" readonly>
                 </div>
-                <div class="form-group" style="display:none;">
-                    <label for="fuelStart">⛽ Нач. топливо, %</label>
+                <div class="form-group">
+                    <label for="fuelStart">⛽ Начальный уровень топлива, %</label>
                     <input type="text" id="fuelStart" placeholder="50">
                 </div>
-                <div class="form-group" style="display:none;">
-                    <label for="fuelEnd">⛽ Кон. топливо, %</label>
+                <div class="form-group">
+                    <label for="fuelEnd">⛽ Конечный уровень топлива, %</label>
                     <input type="text" id="fuelEnd" placeholder="30">
                 </div>
                 <div class="form-group">
                     <label for="fuelUsed">⛽ Израсходовано топлива, %</label>
-                    <input type="text" id="fuelUsed" placeholder="20" readonly style="background:var(--bg-widget);">
+                    <input type="text" id="fuelUsed" placeholder="20" readonly>
                 </div>
             </div>
             <div class="btn-group">
@@ -805,7 +806,6 @@
             clearInactivityTimer();
             document.getElementById('recordsBody').innerHTML =
                 '<tr><td colspan="8" style="text-align:center; color:var(--text-light); padding:15px;">Нет сохранённых записей</td></tr>';
-            // Обнуляем виджеты
             ['dayDist','dayCharge','dayFuel','weekDist','weekCharge','weekFuel','monthDist','monthCharge','monthFuel'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = '0 км';
@@ -1111,7 +1111,7 @@
     }
 
     // ==========================================
-    // 7. СТАТИСТИКА (групповые виджеты)
+    // 7. СТАТИСТИКА (исправлена логика фильтрации по календарным дням)
     // ==========================================
     function updateStats() {
         if (!state.authenticated) {
@@ -1123,7 +1123,6 @@
         }
         const records = getRecords();
         if (records.length === 0) {
-            // Обнуляем
             ['dayDist','dayCharge','dayFuel','weekDist','weekCharge','weekFuel','monthDist','monthCharge','monthFuel'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = '0 км';
@@ -1131,23 +1130,29 @@
             return;
         }
 
-        // Функция для фильтрации записей за последние N дней
+        // Функция фильтрации по количеству календарных дней (включая сегодня)
         function filterByDays(days) {
             const now = new Date();
             const cutoff = new Date(now);
             cutoff.setDate(cutoff.getDate() - days);
+            // Обнуляем время для корректного сравнения
+            cutoff.setHours(0,0,0,0);
             return records.filter(r => {
                 if (!r.tripDate) return false;
                 const parts = r.tripDate.split('.');
                 if (parts.length === 3) {
-                    const d = new Date(parts[2], parts[1]-1, parts[0]);
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1;
+                    const year = parseInt(parts[2], 10);
+                    const d = new Date(year, month, day);
+                    d.setHours(0,0,0,0);
                     return d >= cutoff;
                 }
                 return false;
             });
         }
 
-        // Все записи (за день — все)
+        // Все записи (за день — по сути все, но мы оставим как среднее по всем)
         const all = records;
         const totalDist = all.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
         const totalCharge = all.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
@@ -1157,7 +1162,7 @@
         document.getElementById('dayCharge').textContent = (cnt ? totalCharge / cnt : 0).toFixed(1) + ' %';
         document.getElementById('dayFuel').textContent = (cnt ? totalFuel / cnt : 0).toFixed(1) + ' %';
 
-        // За неделю (7 дней)
+        // За неделю (7 календарных дней)
         const weekRecs = filterByDays(7);
         if (weekRecs.length) {
             const wDist = weekRecs.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
@@ -1173,7 +1178,7 @@
             document.getElementById('weekFuel').textContent = '0 %';
         }
 
-        // За месяц (30 дней)
+        // За месяц (30 календарных дней)
         const monthRecs = filterByDays(30);
         if (monthRecs.length) {
             const mDist = monthRecs.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
@@ -1429,7 +1434,7 @@
     }
 
     // ==========================================
-    // 11. ДИАГРАММА С ВОЗМОЖНОСТЬЮ ВЫБОРА ТИПА И СРЕДНИХ
+    // 11. ДИАГРАММА
     // ==========================================
     let chartInstance = null;
 
@@ -1499,12 +1504,10 @@
         const datasets = [];
         const avgData = {};
 
-        // Подготовка данных
         const distAvg = distData.length ? distData.reduce((a,b)=>a+b,0)/distData.length : 0;
         const chargeAvg = chargeData.length ? chargeData.reduce((a,b)=>a+b,0)/chargeData.length : 0;
         const fuelAvg = fuelData.length ? fuelData.reduce((a,b)=>a+b,0)/fuelData.length : 0;
 
-        // Серия "Пробег"
         if (showDist) {
             datasets.push({
                 label: 'Пробег, км',
@@ -1517,7 +1520,6 @@
             });
             avgData.dist = distAvg;
         }
-        // Серия "Заряд"
         if (showCharge) {
             datasets.push({
                 label: 'Расход зарядки, %',
@@ -1530,7 +1532,6 @@
             });
             avgData.charge = chargeAvg;
         }
-        // Серия "Топливо"
         if (showFuel) {
             datasets.push({
                 label: 'Расход топлива, %',
@@ -1544,9 +1545,7 @@
             avgData.fuel = fuelAvg;
         }
 
-        // Добавляем линии средних значений
         if (showAvg) {
-            // Для каждой активной серии добавим линию среднего
             if (showDist && distData.length) {
                 datasets.push({
                     label: 'Ср. пробег',
@@ -1651,7 +1650,6 @@
             }
         });
 
-        // Обработчики на чекбоксы и радио
         document.querySelectorAll('#chkDistance, #chkCharge, #chkFuel, #chkAvg, input[name="chartType"]').forEach(el => {
             el.onchange = function() {
                 renderChart(getRecords());
