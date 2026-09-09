@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Анализ данных поездки</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%234a7bc4' stroke-width='1.5' d='M2 12 L5 8 L8 10 L11 5 L14 7'/%3E%3Crect x='1' y='13' width='14' height='1.5' fill='%234a7bc4'/%3E%3C/svg%3E">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* ===== CSS переменные для тем ===== */
+        :root {
+            --bg-body: #f0f4fd;
+            --bg-dashboard: #ffffff;
+            --bg-widget: #f0f4fe;
+            --bg-widget-hover: #e6edfc;
+            --border-widget: rgba(255,255,255,0.5);
+            --text-primary: #0b1a33;
+            --text-secondary: #3c4b64;
+            --text-muted: #5a6f8c;
+            --text-light: #8696b2;
+            --shadow: 0 20px 48px rgba(0, 8, 28, 0.08);
+            --shadow-hover: 0 8px 20px rgba(30, 60, 130, 0.08);
+            --clock-bg: #1f2a44;
+            --clock-text: #f0f4ff;
+            --clock-border: #3b4a6b;
+            --clock-hover: #263459;
+            --modal-bg: #ffffff;
+            --modal-shadow: 0 30px 60px rgba(0, 8, 28, 0.3);
+            --border-color: #eef3fb;
+            --btn-primary: #4a7bc4;
+            --btn-primary-hover: #3a6ab0;
+            --btn-light: #d4e0f7;
+            --btn-light-hover: #c0d0ea;
+            --btn-light-text: #0b1a33;
+            --btn-danger: #c45a6b;
+            --btn-danger-hover: #b14a5a;
+            --btn-success: #2e7d5e;
+            --btn-success-hover: #1e6d4e;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --change-positive: #1a7d4a;
+            --change-negative: #b13a4b;
+            --table-header-bg: #e8edf8;
+            --table-row-hover: #f5f8ff;
+            --table-border: #dce3ef;
+            --input-bg: #ffffff;
+            --input-border: #c8d4e8;
+            --tooltip-bg: rgba(255, 255, 255, 0.97);
+            --tooltip-border: rgba(200, 212, 235, 0.5);
+            --login-gradient: linear-gradient(135deg, #4a7bc4 0%, #6b96d9 100%);
+            --login-gradient-logout: linear-gradient(135deg, #c45a6b 0%, #d97a8a 100%);
+            --login-shadow: 0 4px 15px rgba(74, 123, 196, 0.35);
+            --login-shadow-logout: 0 4px 15px rgba(196, 90, 107, 0.35);
+            --webkit-overflow-scrolling: touch;
+            --backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            --chart-grid-color: #dce3ef;
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            .modal-overlay { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+            .global-tooltip { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+            .clock-widget, .weather-widget, .stat-widget { -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+            th { position: -webkit-sticky; position: sticky; }
+            .dashboard, .container, .modal-content, .clock-widget, .weather-widget, .stat-widget, .global-tooltip, .toast {
+                -webkit-border-radius: 12px; border-radius: 12px;
+            }
+            .dashboard { -webkit-border-radius: 44px; border-radius: 44px; }
+            .login-btn { -webkit-border-radius: 40px; border-radius: 40px; }
+            .flex-row input[type="file"] { -webkit-appearance: none; appearance: none; }
+            .flex-row input[type="file"]::file-selector-button { -webkit-appearance: none; appearance: none; }
+            .form-group input, .settings-group input { -webkit-appearance: none; appearance: none; }
+            .top-bar-left .action-btn, .top-bar-left .settings-btn, .login-btn, .delete-btn, button {
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0d1117;
+            --bg-dashboard: #161b22;
+            --bg-widget: #21262d;
+            --bg-widget-hover: #2d333b;
+            --border-widget: rgba(255,255,255,0.08);
+            --text-primary: #e6edf3;
+            --text-secondary: #b0c4d9;
+            --text-muted: #8b9eb5;
+            --text-light: #6a7e9e;
+            --shadow: 0 20px 48px rgba(0,0,0,0.4);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.3);
+            --clock-bg: #0d1117;
+            --clock-text: #e6edf3;
+            --clock-border: #30363d;
+            --clock-hover: #161b22;
+            --modal-bg: #161b22;
+            --modal-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            --border-color: #30363d;
+            --btn-primary: #58a6ff;
+            --btn-primary-hover: #4796f0;
+            --btn-light: #2d3b52;
+            --btn-light-hover: #3b4a6b;
+            --btn-light-text: #e6edf3;
+            --btn-danger: #f85149;
+            --btn-danger-hover: #e03a32;
+            --btn-success: #3fb950;
+            --btn-success-hover: #2ea043;
+            --change-positive: #3fb950;
+            --change-negative: #f85149;
+            --table-header-bg: #21262d;
+            --table-row-hover: #1c2128;
+            --table-border: #30363d;
+            --input-bg: #0d1117;
+            --input-border: #30363d;
+            --tooltip-bg: rgba(22,27,34,0.97);
+            --tooltip-border: rgba(48,54,61,0.8);
+            --login-gradient: linear-gradient(135deg, #58a6ff 0%, #79b8ff 100%);
+            --login-gradient-logout: linear-gradient(135deg, #f85149 0%, #f4706a 100%);
+            --login-shadow: 0 4px 15px rgba(88,166,255,0.35);
+            --login-shadow-logout: 0 4px 15px rgba(248,81,73,0.35);
+            --chart-grid-color: #30363d;
+        }
+
+        /* ===== Общие стили ===== */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+        body { background:var(--bg-body); min-height:100vh; padding:20px 24px; margin:0; transition:background var(--transition), color var(--transition); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+        .dashboard { width:100%; max-width:1200px; margin:0 auto; background:var(--bg-dashboard); border-radius:44px; box-shadow:var(--shadow); padding:28px 36px 32px; transition:all var(--transition); }
+
+        /* ===== Анимации ===== */
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes slideUp { from { transform:translateY(30px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        .fade-in { animation:fadeInUp 0.5s ease forwards; }
+
+        /* ===== Скрытые элементы ===== */
+        .hidden { display:none !important; }
+
+        /* ===== Верхняя панель ===== */
+        .top-bar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px 20px; margin-bottom:20px; }
+        .top-bar-left { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .top-bar-left .action-btn, .top-bar-left .settings-btn {
+            background:var(--btn-light); border:1px solid var(--border-widget); border-radius:40px; padding:8px 16px; cursor:pointer;
+            font-size:0.85rem; color:var(--btn-light-text); transition:all var(--transition); display:flex; align-items:center; gap:6px;
+        }
+        .top-bar-left .action-btn:hover, .top-bar-left .settings-btn:hover { background:var(--btn-light-hover); transform:translateY(-1px); }
+        .top-bar-left .action-btn:active, .top-bar-left .settings-btn:active { transform:scale(0.95); }
+
+        /* ===== Кнопка входа/выхода ===== */
+        .login-btn {
+            border:none; border-radius:40px; padding:10px 24px; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all var(--transition);
+            display:flex; align-items:center; gap:8px; color:#fff; letter-spacing:0.3px; position:relative; overflow:hidden;
+            background:var(--login-gradient); box-shadow:var(--login-shadow);
+        }
+        .login-btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); transition:left 0.6s ease; }
+        .login-btn:hover::before { left:100%; }
+        .login-btn:hover { transform:translateY(-2px) scale(1.02); box-shadow:var(--login-shadow-hover); }
+        .login-btn:active { transform:scale(0.97); }
+        .login-btn.logged-in { background:var(--login-gradient-logout); box-shadow:var(--login-shadow-logout); }
+        .login-btn.logged-in:hover { box-shadow:var(--login-shadow-logout-hover); }
+        .login-btn .icon { font-size:1.1rem; transition:transform 0.3s ease; }
+        .login-btn:hover .icon { transform:rotate(-5deg) scale(1.1); }
+        .login-btn.logged-in:hover .icon { transform:rotate(10deg) scale(1.1); }
+
+        /* ===== СТАТУС-БАР ===== */
+        .status-bar {
+            margin:0 0 12px 0; font-size:0.75rem; color:var(--text-light); padding:6px 12px; background:var(--bg-widget);
+            border-radius:40px; border:1px solid var(--border-widget); display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:8px 16px;
+        }
+        .status-bar .auth-status.authorized { color:var(--change-positive); }
+        .status-bar .auth-status.unauthorized { color:var(--change-negative); }
+
+        /* ===== Виджеты статистики (групповые) ===== */
+        .widget-row { display:flex; flex-wrap:wrap; gap:16px 24px; margin-bottom:20px; align-items:stretch; }
+        .stat-widget {
+            background:var(--bg-widget); padding:12px 20px; border-radius:16px; border:1px solid var(--border-widget);
+            backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); box-shadow:0 2px 6px rgba(0,0,0,0.02);
+            transition:all var(--transition); cursor:default; flex:1 1 180px; min-width:160px; display:flex; flex-direction:column; gap:4px;
+        }
+        .stat-widget:hover { background:var(--bg-widget-hover); border-color:var(--border-widget); box-shadow:var(--shadow-hover); transform:translateY(-2px) scale(1.01); }
+        .stat-widget .stat-header { font-weight:600; font-size:0.85rem; color:var(--text-secondary); margin-bottom:2px; }
+        .stat-widget .stat-row { display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); padding:1px 0; }
+        .stat-widget .stat-row .stat-value { font-weight:600; color:var(--text-primary); }
+
+        /* ===== Часы и погода ===== */
+        .right-widget { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; margin-left:auto; }
+        .clock-widget {
+            background:var(--clock-bg); padding:10px 24px; border-radius:60px; color:var(--clock-text);
+            box-shadow:0 6px 14px rgba(20,30,60,0.15); border:1px solid var(--clock-border); transition:all var(--transition);
+            cursor:default; backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); white-space:nowrap;
+        }
+        .clock-widget:hover { background:var(--clock-hover); border-color:var(--clock-border); box-shadow:0 10px 24px rgba(0,20,60,0.2); transform:scale(1.02); }
+        .clock-date { font-size:0.8rem; font-weight:400; letter-spacing:0.5px; color:#b2c6ed; margin-right:10px; }
+        .clock-time { font-size:1.3rem; font-weight:600; letter-spacing:1px; color:#ffffff; }
+
+        .weather-widget {
+            background:var(--clock-bg); padding:6px 16px; border-radius:40px; color:var(--clock-text); border:1px solid var(--clock-border);
+            font-size:0.8rem; display:flex; align-items:center; gap:8px; transition:all var(--transition);
+            backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.1);
+            min-height:32px;
+        }
+        .weather-widget:hover { background:var(--clock-hover); border-color:var(--clock-border); transform:scale(1.02); }
+        .weather-widget .weather-icon { font-size:1.2rem; line-height:1; }
+        .weather-widget .weather-temp { font-weight:600; }
+        .weather-widget .weather-desc { opacity:0.8; font-size:0.75rem; }
+
+        /* ===== Глобальный тултип ===== */
+        .global-tooltip {
+            position:fixed; z-index:100000; background:var(--tooltip-bg); border-radius:12px; padding:12px 16px;
+            box-shadow:var(--modal-shadow); border:1px solid var(--tooltip-border); backdrop-filter:blur(6px);
+            -webkit-backdrop-filter:blur(6px); color:var(--text-primary); font-size:0.8rem; line-height:1.6;
+            pointer-events:none; display:none; min-width:200px; max-width:280px; transition:opacity 0.15s ease;
+        }
+
+        /* ===== Модальные окна ===== */
+        .modal-overlay {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45);
+            backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:999; align-items:center; justify-content:center;
+            animation:fadeIn 0.25s ease;
+        }
+        .modal-overlay.active { display:flex; }
+        .modal-content {
+            background:var(--modal-bg); border-radius:32px; padding:28px 32px 24px; max-width:800px; width:92%;
+            box-shadow:var(--modal-shadow); animation:slideUp 0.3s ease; position:relative; color:var(--text-primary);
+            max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+        }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:2px solid var(--border-color); padding-bottom:12px; flex-wrap:wrap; gap:10px; }
+        .modal-header h3 { font-size:1.2rem; font-weight:600; color:var(--text-primary); }
+        .modal-close {
+            background:var(--bg-widget); border:none; border-radius:50%; width:36px; height:36px; font-size:1.2rem;
+            cursor:pointer; color:var(--text-secondary); transition:all var(--transition); display:flex; align-items:center; justify-content:center;
+        }
+        .modal-close:hover { background:var(--bg-widget-hover); transform:rotate(90deg) scale(1.1); }
+
+        .settings-group { margin-bottom:20px; }
+        .settings-group label { display:block; font-weight:500; color:var(--text-secondary); margin-bottom:6px; font-size:0.9rem; }
+        .settings-group input {
+            width:100%; padding:8px 12px; border-radius:40px; border:1px solid var(--border-widget); background:var(--bg-widget);
+            color:var(--text-primary); font-size:0.9rem; outline:none; transition:all var(--transition);
+        }
+        .settings-group input:focus { border-color:var(--btn-primary); box-shadow:0 0 0 2px var(--btn-primary)30; }
+        .settings-group .hint { font-size:0.75rem; color:var(--text-light); margin-top:4px; }
+        .settings-group .hint a { color:var(--btn-primary); text-decoration:none; }
+        .settings-group .hint a:hover { text-decoration:underline; }
+
+        .login-error { color:var(--change-negative); font-size:0.85rem; margin-top:8px; display:none; }
+
+        /* ===== Форма данных поездки ===== */
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin:10px 0; }
+        .form-group { display:flex; flex-direction:column; gap:3px; }
+        .form-group label { font-weight:600; font-size:0.78rem; color:var(--text-secondary); white-space:nowrap; }
+        .form-group input {
+            padding:8px 10px; border:1.5px solid var(--input-border); border-radius:6px; font-size:0.9rem; width:100%;
+            min-height:40px; background:var(--input-bg); color:var(--text-primary);
+        }
+        .form-group input:focus { border-color:var(--btn-primary); box-shadow:0 0 0 2px var(--btn-primary)30; }
+        .form-group input.found { background:#d5f5e3; border-color:var(--change-positive); }
+
+        /* ===== Кнопки ===== */
+        button {
+            background:var(--btn-light); color:var(--btn-light-text); border:1px solid var(--border-widget); padding:14px 20px;
+            border-radius:8px; font-size:1rem; cursor:pointer; transition:all var(--transition); width:100%; touch-action:manipulation;
+            min-height:48px;
+        }
+        button:active { transform:scale(0.97); }
+        button:hover { background:var(--btn-light-hover); }
+        button:disabled { background:#95a5a6; cursor:not-allowed; opacity:0.7; }
+        .save-btn { background:var(--btn-light); margin-top:8px; }
+        .save-btn:hover { background:var(--btn-light-hover); }
+        .clear-btn { background:var(--btn-light); margin-top:8px; }
+        .clear-btn:hover { background:var(--btn-light-hover); }
+
+        .btn-group { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+        .btn-group .btn-row { display:flex; gap:8px; }
+        .btn-group .btn-row button { flex:1; }
+        .btn-group .btn-row button:last-child { background:var(--btn-light); }
+        .btn-group .btn-row button:last-child:hover { background:var(--btn-light-hover); }
+
+        /* ===== Таблица ===== */
+        .table-wrapper { overflow-x:auto; -webkit-overflow-scrolling:touch; position:relative; z-index:1; }
+        table { width:100%; border-collapse:collapse; font-size:0.8rem; min-width:700px; position:relative; z-index:1; }
+        th, td { padding:8px 6px; text-align:left; border-bottom:1px solid var(--table-border); white-space:nowrap; background:var(--bg-dashboard); position:relative; z-index:1; }
+        th { background:var(--table-header-bg); font-weight:600; font-size:0.75rem; position:-webkit-sticky; position:sticky; top:0; z-index:2; color:var(--text-secondary); }
+        td { font-size:0.8rem; color:var(--text-primary); }
+        .delete-btn {
+            background:var(--btn-danger); color:#fff; padding:4px 10px; font-size:0.7rem; border:none; border-radius:4px;
+            cursor:pointer; width:auto; min-height:30px;
+        }
+        .delete-btn:hover { background:var(--btn-danger-hover); }
+        .sort-btn {
+            background:transparent; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.7rem; padding:2px 6px;
+            width:auto; min-height:20px; display:inline-block;
+        }
+        .sort-btn:hover { color:var(--text-primary); background:var(--bg-widget-hover); border-radius:4px; }
+
+        .clear-all-wrapper { position:relative; z-index:0; margin-top:-10px; padding-top:10px; }
+        .clear-all-wrapper .clear-btn { position:relative; z-index:0; opacity:0.7; transition:opacity var(--transition); }
+        .clear-all-wrapper .clear-btn:hover { opacity:1; }
+        .table-wrapper + .clear-all-wrapper { margin-top:0; }
+
+        .status { margin:10px 0; font-weight:500; color:#e67e22; padding:8px 12px; border-radius:6px; background:#fef9e7; font-size:0.95rem; }
+        .status.success { color:var(--change-positive); background:#eafaf1; }
+        .status.error { color:var(--change-negative); background:#fdedec; }
+
+        .preview-img { max-width:100%; max-height:150px; border-radius:8px; border:1px solid var(--border-color); margin:10px 0; object-fit:contain; width:100%; }
+        .ocr-text-box { display:none; }
+        .log-area {
+            background:var(--bg-widget); border:1px solid var(--border-color); border-radius:6px; padding:8px 10px;
+            max-height:120px; overflow-y:auto; -webkit-overflow-scrolling:touch; font-family:'Courier New', monospace;
+            font-size:0.7rem; margin-top:8px; white-space:pre-wrap; word-break:break-all; color:var(--text-secondary);
+        }
+
+        .auto-fill-badge { display:inline-block; background:var(--change-positive); color:white; padding:2px 10px; border-radius:12px; font-size:0.7rem; margin-left:8px; }
+
+        .container { background:var(--bg-dashboard); padding:15px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.08); margin-bottom:15px; border:1px solid var(--border-color); }
+
+        .flex-row { display:flex; flex-direction:column; gap:10px; margin:10px 0; }
+        .flex-row input[type="file"] {
+            width:100%; padding:12px; border:2px dashed var(--input-border); border-radius:8px; background:var(--bg-widget);
+            font-size:0.95rem; color:var(--text-secondary);
+        }
+        .flex-row input[type="file"]::file-selector-button {
+            padding:8px 16px; border-radius:6px; border:none; background:var(--btn-light); color:var(--btn-light-text);
+            font-size:0.9rem; cursor:pointer;
+        }
+        .flex-row input[type="file"]::file-selector-button:hover { background:var(--btn-light-hover); }
+
+        /* ===== Диаграмма в модальном окне ===== */
+        .chart-container-modal { position:relative; height:300px; width:100%; margin-top:10px; }
+        .chart-container-modal canvas { width:100% !important; height:100% !important; border-radius:8px; background:var(--chart-bg); }
+        .chart-legend { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:12px; font-size:0.8rem; color:var(--text-secondary); }
+        .chart-legend-item { display:flex; align-items:center; gap:6px; }
+        .chart-legend-color { width:16px; height:4px; border-radius:2px; }
+        .chart-controls {
+            display:flex; flex-wrap:wrap; gap:12px 20px; margin-top:12px; justify-content:center; font-size:0.9rem; color:var(--text-secondary);
+            align-items:center;
+        }
+        .chart-controls label { display:flex; align-items:center; gap:6px; cursor:pointer; }
+        .chart-controls input[type="checkbox"] { width:18px; height:18px; accent-color:var(--btn-primary); cursor:pointer; }
+        .chart-controls input[type="radio"] { accent-color:var(--btn-primary); cursor:pointer; }
+
+        /* ===== Toast ===== */
+        .toast {
+            position:fixed; bottom:30px; right:30px; background:var(--bg-dashboard); color:var(--text-primary);
+            padding:14px 24px; border-radius:16px; box-shadow:var(--modal-shadow); border:1px solid var(--border-color);
+            font-size:0.9rem; z-index:1000; transform:translateY(100px); opacity:0; transition:all 0.4s ease; max-width:90vw;
+        }
+        .toast.show { transform:translateY(0); opacity:1; }
+        .toast.success { border-left:4px solid var(--change-positive); }
+        .toast.error { border-left:4px solid var(--change-negative); }
+        .toast.warning { border-left:4px solid #f0ad4e; }
+
+        /* ===== Адаптация ===== */
+        @media (max-width:768px) {
+            body { padding:12px; }
+            .dashboard { padding:16px; border-radius:28px; }
+            .top-bar-left { gap:8px; }
+            .top-bar-left .action-btn, .top-bar-left .settings-btn { padding:6px 12px; font-size:0.75rem; }
+            .clock-widget { padding:8px 16px; }
+            .clock-date { font-size:0.7rem; }
+            .clock-time { font-size:1rem; }
+            .right-widget { margin-left:0; align-items:flex-start; }
+            .form-grid { grid-template-columns:1fr 1fr; gap:6px 8px; }
+            .form-group label { font-size:0.7rem; }
+            .form-group input { font-size:0.85rem; padding:6px 8px; min-height:36px; }
+            .modal-content { padding:16px; max-width:95%; }
+            table { font-size:0.7rem; min-width:600px; }
+            th, td { padding:5px 4px; }
+            .login-btn { padding:8px 16px; font-size:0.8rem; }
+            .weather-widget { font-size:0.7rem; padding:4px 12px; }
+            .status-bar { font-size:0.7rem; padding:4px 12px; flex-direction:column; align-items:flex-start; }
+            .stat-widget { padding:8px 14px; min-width:140px; flex:1 1 150px; }
+            .stat-widget .stat-header { font-size:0.75rem; }
+            .stat-widget .stat-row { font-size:0.7rem; }
+            .global-tooltip { min-width:160px; max-width:220px; font-size:0.7rem; padding:8px 12px; }
+            .chart-container-modal { height:250px; }
+            .chart-controls { gap:8px 12px; font-size:0.8rem; }
+        }
+        @media (max-width:480px) {
+            .top-bar-left .action-btn, .top-bar-left .settings-btn { padding:4px 10px; font-size:0.7rem; }
+            .form-grid { grid-template-columns:1fr; }
+            .login-btn { padding:6px 12px; font-size:0.75rem; }
+            table { font-size:0.65rem; min-width:500px; }
+            .stat-widget { padding:6px 10px; min-width:120px; }
+            .stat-widget .stat-header { font-size:0.7rem; }
+            .stat-widget .stat-row { font-size:0.65rem; }
+            .global-tooltip { min-width:140px; max-width:200px; font-size:0.65rem; padding:6px 10px; }
+            .chart-container-modal { height:220px; }
+        }
+        @supports (-webkit-touch-callout: none) {
+            .dashboard { padding:28px 36px 32px; }
+            .clock-widget, .weather-widget, .stat-widget { -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px); }
+            .global-tooltip { -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+            .modal-overlay { -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+            .top-bar-left .action-btn, .top-bar-left .settings-btn { -webkit-tap-highlight-color:transparent; }
+            .login-btn { -webkit-tap-highlight-color:transparent; }
+            .delete-btn { -webkit-tap-highlight-color:transparent; }
+            button { -webkit-tap-highlight-color:transparent; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+
+    <!-- Верхняя панель -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <button class="action-btn" id="settingsBtn">⚙️ Настройки облака</button>
+            <button class="action-btn" id="saveCloudBtn">☁️ Сохранить в облако</button>
+            <button class="action-btn" id="loadCloudBtn">☁️ Загрузить из облака</button>
+            <button class="action-btn" id="chartBtn">📊 Диаграмма</button>
+        </div>
+        <div class="top-bar-right">
+            <button class="login-btn" id="loginBtn">
+                <span class="icon" id="loginIcon">🔐</span>
+                <span id="loginLabel">Войти</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Статус-бар -->
+    <div class="status-bar">
+        <span><span class="source">📊 Источник: </span><span id="dataSource">Локальное хранилище</span></span>
+        <span><span>🔄 обновлено: </span><span class="update-time" id="lastUpdate">—</span></span>
+        <span id="authStatus" class="auth-status unauthorized">🔒 Требуется вход</span>
+    </div>
+
+    <!-- Виджеты статистики (групповые) -->
+    <div class="widget-row" id="statWidgets">
+        <div class="stat-widget" id="statDay">
+            <div class="stat-header">📅 За день</div>
+            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="dayDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="dayCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="dayFuel">0 %</span></div>
+        </div>
+        <div class="stat-widget" id="statWeek">
+            <div class="stat-header">📅 За неделю</div>
+            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="weekDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="weekCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="weekFuel">0 %</span></div>
+        </div>
+        <div class="stat-widget" id="statMonth">
+            <div class="stat-header">📅 За месяц</div>
+            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="monthDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="monthCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="monthFuel">0 %</span></div>
+        </div>
+        <div class="right-widget">
+            <div class="clock-widget">
+                <span class="clock-date" id="current-date">—</span>
+                <span class="clock-time" id="current-time">--:--</span>
+            </div>
+            <div class="weather-widget" id="weatherWidget">
+                <span class="weather-icon" id="weatherIcon">⏳</span>
+                <span class="weather-temp" id="weatherTemp">--°C</span>
+                <span class="weather-desc" id="weatherDesc">загрузка...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Блоки, скрытые до авторизации -->
+    <div id="authRequiredSections" class="hidden">
+        <!-- Блок распознавания -->
+        <div class="container">
+            <h3>📸 1. Загрузите скриншот</h3>
+            <div class="flex-row">
+                <input type="file" id="imageInput" accept="image/*" capture="environment">
+                <button id="recognizeBtn">🚀 Распознать и заполнить</button>
+            </div>
+            <div id="previewContainer"></div>
+            <div id="statusMessage" class="status"></div>
+        </div>
+
+        <div class="container">
+            <h3>📝 2. Распознанный текст <span id="ocrStatus"></span></h3>
+            <textarea id="ocrText" class="ocr-text-box" readonly placeholder="Здесь будет отображаться распознанный текст..."></textarea>
+            <div class="log-area" id="debugLog">📋 Лог распознавания...</div>
+        </div>
+
+        <div class="container">
+            <h3>📊 3. Данные поездки <span class="auto-fill-badge">✨ Автозаполнение</span></h3>
+            <div class="form-grid" id="formGrid">
+                <div class="form-group">
+                    <label for="tripDate">📅 Дата поездки</label>
+                    <input type="text" id="tripDate" placeholder="2025-03-15">
+                </div>
+                <div class="form-group">
+                    <label for="startTime">📍 Старт (время)</label>
+                    <input type="text" id="startTime" placeholder="07:37">
+                </div>
+                <div class="form-group">
+                    <label for="endTime">🏁 Финиш (время)</label>
+                    <input type="text" id="endTime" placeholder="15:45">
+                </div>
+                <div class="form-group">
+                    <label for="duration">⏱ Продолжительность</label>
+                    <input type="text" id="duration" placeholder="01:15">
+                </div>
+                <div class="form-group">
+                    <label for="distance">📏 Расстояние, км</label>
+                    <input type="text" id="distance" placeholder="12.5">
+                </div>
+                <div class="form-group" style="display:none;">
+                    <label for="chargeStart">🔋 Нач. зарядка, %</label>
+                    <input type="text" id="chargeStart" placeholder="85">
+                </div>
+                <div class="form-group" style="display:none;">
+                    <label for="chargeEnd">🔋 Кон. зарядка, %</label>
+                    <input type="text" id="chargeEnd" placeholder="60">
+                </div>
+                <div class="form-group">
+                    <label for="chargeUsed">⚡ Израсходовано зарядки, %</label>
+                    <input type="text" id="chargeUsed" placeholder="25" readonly style="background:var(--bg-widget);">
+                </div>
+                <div class="form-group" style="display:none;">
+                    <label for="fuelStart">⛽ Нач. топливо, %</label>
+                    <input type="text" id="fuelStart" placeholder="50">
+                </div>
+                <div class="form-group" style="display:none;">
+                    <label for="fuelEnd">⛽ Кон. топливо, %</label>
+                    <input type="text" id="fuelEnd" placeholder="30">
+                </div>
+                <div class="form-group">
+                    <label for="fuelUsed">⛽ Израсходовано топлива, %</label>
+                    <input type="text" id="fuelUsed" placeholder="20" readonly style="background:var(--bg-widget);">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button id="saveBtn" class="save-btn">💾 Сохранить поездку</button>
+                <div class="btn-row">
+                    <button id="clearFieldsBtn">🧹 Очистить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица сохранённых поездок -->
+        <div class="container">
+            <h3>📋 4. Сохранённые поездки</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Дата <button class="sort-btn" id="sortDateBtn">↕</button></th>
+                            <th>Старт</th>
+                            <th>Финиш</th>
+                            <th>Продолжительность</th>
+                            <th>Расстояние, км</th>
+                            <th>Израсходовано зарядки, %</th>
+                            <th>Израсходовано топлива, %</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody">
+                        <tr><td colspan="8" style="text-align:center; color:var(--text-light); padding:15px;">Нет сохранённых записей</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="clear-all-wrapper">
+                <button id="clearAllBtn" class="clear-btn">🗑 Очистить все записи</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== МОДАЛЬНЫЕ ОКНА ===== -->
+
+<!-- Настройки облака -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>⚙️ Настройки облака</h3>
+            <button class="modal-close" id="settingsClose">✕</button>
+        </div>
+        <div class="settings-group">
+            <label for="yandexTokenInputSettings">🔑 Токен Яндекс Диска</label>
+            <input type="password" id="yandexTokenInputSettings" placeholder="Вставьте OAuth-токен">
+            <div class="hint">
+                <a href="https://yandex.ru/dev/disk/poligon/" target="_blank">Получить токен</a>
+                (нажмите «Получить токен» и скопируйте)
+            </div>
+            <div style="margin-top:8px; display:flex; gap:8px;">
+                <button id="saveTokenSettingsBtn" style="width:auto; padding:8px 20px; background:var(--btn-light); color:var(--btn-light-text);">💾 Сохранить</button>
+                <button id="resetTokenSettingsBtn" style="width:auto; padding:8px 20px; background:var(--btn-light); color:var(--btn-light-text);">🗑 Сбросить</button>
+            </div>
+            <div class="login-error" id="tokenSettingsError" style="display:none;">Токен не может быть пустым</div>
+        </div>
+        <div style="margin-top:12px; text-align:right; font-size:0.75rem; color:var(--text-light);">
+            Токен сохраняется в локальном хранилище браузера.
+        </div>
+    </div>
+</div>
+
+<!-- Токен Яндекс Диска -->
+<div class="modal-overlay" id="tokenModal">
+    <div class="modal-content" style="max-width:480px;">
+        <div class="modal-header">
+            <h3>🔑 Токен Яндекс Диска</h3>
+            <button class="modal-close" id="tokenModalClose">✕</button>
+        </div>
+        <div class="settings-group">
+            <label for="yandexTokenInput">Введите OAuth-токен</label>
+            <input type="password" id="yandexTokenInput" placeholder="Вставьте токен сюда">
+            <div class="hint" style="margin-top:8px;">
+                <a href="https://yandex.ru/dev/disk/poligon/" target="_blank">Получить токен</a>
+                (нажмите «Получить токен» и скопируйте)
+            </div>
+            <div class="login-error" id="tokenError" style="display:none;">Токен не может быть пустым</div>
+        </div>
+        <button class="action-btn" id="tokenSubmit" style="width:100%; justify-content:center; background:var(--btn-light); color:var(--btn-light-text);">Сохранить токен</button>
+        <div style="margin-top:12px; text-align:right; font-size:0.75rem; color:var(--text-light);">
+            Токен будет сохранён в локальном хранилище браузера.
+        </div>
+    </div>
+</div>
+
+<!-- Авторизация -->
+<div class="modal-overlay" id="loginModal">
+    <div class="modal-content" style="max-width:400px;">
+        <div class="modal-header">
+            <h3 id="loginTitle">🔐 Вход</h3>
+            <button class="modal-close" id="loginModalClose">✕</button>
+        </div>
+        <div class="settings-group">
+            <label for="loginPassword" id="loginPasswordLabel">Код доступа</label>
+            <input type="password" id="loginPassword" placeholder="Введите код доступа" autocomplete="current-password">
+            <div class="hint" id="loginHint">Код действует только в этом браузере.</div>
+            <div class="login-error" id="loginError">Неверный код доступа</div>
+        </div>
+        <button class="action-btn" id="loginSubmit" style="width:100%; justify-content:center; background:var(--btn-primary); color:#fff;">Войти</button>
+    </div>
+</div>
+
+<!-- Диаграмма -->
+<div class="modal-overlay" id="chartModal">
+    <div class="modal-content" style="max-width:800px;">
+        <div class="modal-header">
+            <h3>📊 Ежесуточная динамика</h3>
+            <button class="modal-close" id="chartModalClose">✕</button>
+        </div>
+        <div class="chart-controls">
+            <label><input type="checkbox" id="chkDistance" checked> Пробег, км</label>
+            <label><input type="checkbox" id="chkCharge" checked> Расход зарядки, %</label>
+            <label><input type="checkbox" id="chkFuel" checked> Расход топлива, %</label>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <span>Тип:</span>
+                <label><input type="radio" name="chartType" value="bar" checked> Столбцы</label>
+                <label><input type="radio" name="chartType" value="line"> Линия</label>
+            </div>
+            <label><input type="checkbox" id="chkAvg"> Средние значения</label>
+        </div>
+        <div class="chart-container-modal">
+            <canvas id="chartCanvas"></canvas>
+        </div>
+        <div class="chart-legend">
+            <span class="chart-legend-item"><span class="chart-legend-color" style="background:#4a7bc4;"></span> Пробег, км</span>
+            <span class="chart-legend-item"><span class="chart-legend-color" style="background:#2ecc71;"></span> Расход зарядки, %</span>
+            <span class="chart-legend-item"><span class="chart-legend-color" style="background:#e67e22;"></span> Расход топлива, %</span>
+        </div>
+        <div style="margin-top:10px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
+            По каждой дате построены значения из таблицы
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Глобальный тултип -->
+<div class="global-tooltip" id="globalTooltip"></div>
+
+<script>
+(function() {
+    "use strict";
+
+    // ==========================================
+    // 0. Глобальный тултип
+    // ==========================================
+    const tooltipEl = document.getElementById('globalTooltip');
+
+    function showTooltipHtml(html, x, y) {
+        tooltipEl.style.display = 'block';
+        tooltipEl.innerHTML = html;
+        let left = x + 20;
+        let top = y + 20;
+        tooltipEl.style.left = left + 'px';
+        tooltipEl.style.top = top + 'px';
+        requestAnimationFrame(() => {
+            const rect = tooltipEl.getBoundingClientRect();
+            if (rect.right > window.innerWidth - 10) {
+                left = Math.max(10, left - (rect.right - window.innerWidth + 10));
+                tooltipEl.style.left = left + 'px';
+            }
+            if (rect.bottom > window.innerHeight - 10) {
+                top = y - rect.height - 20;
+                if (top < 10) top = 10;
+                tooltipEl.style.top = top + 'px';
+            }
+        });
+    }
+
+    function hideTooltip() {
+        tooltipEl.style.display = 'none';
+    }
+
+    // ==========================================
+    // 1. Тема (автоматическая)
+    // ==========================================
+    let state = {
+        theme: 'light',
+        authenticated: false,
+        inactivityTimeout: null,
+        inactivityDelay: 300000,
+        sortOrder: 'desc'
+    };
+
+    function loadSettings() {
+        try {
+            const saved = localStorage.getItem('dashboardSettings');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.theme) state.theme = parsed.theme;
+            }
+        } catch(e) {}
+    }
+
+    function saveSettings() {
+        try {
+            localStorage.setItem('dashboardSettings', JSON.stringify({
+                theme: state.theme
+            }));
+        } catch(e) {}
+    }
+
+    const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        state.theme = theme;
+        saveSettings();
+    }
+
+    function autoThemeCheck() {
+        const targetTheme = systemThemeQuery.matches ? 'dark' : 'light';
+        if (state.theme !== targetTheme) {
+            applyTheme(targetTheme);
+        }
+    }
+
+    if (typeof systemThemeQuery.addEventListener === 'function') {
+        systemThemeQuery.addEventListener('change', function(e) {
+            applyTheme(e.matches ? 'dark' : 'light');
+        });
+    }
+
+    // ==========================================
+    // 2. АВТОРИЗАЦИЯ
+    // ==========================================
+    const PASSCODE_HASH_KEY = 'tripPasscodeHash';
+
+    async function hashPasscode(passcode) {
+        const bytes = new TextEncoder().encode(passcode);
+        const digest = await crypto.subtle.digest('SHA-256', bytes);
+        return Array.from(new Uint8Array(digest))
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');
+    }
+
+    function updateLoginModalMode() {
+        const hasPasscode = Boolean(localStorage.getItem(PASSCODE_HASH_KEY));
+        document.getElementById('loginTitle').textContent = hasPasscode ? '🔐 Вход' : '🔐 Создание кода доступа';
+        document.getElementById('loginPasswordLabel').textContent = hasPasscode ? 'Код доступа' : 'Придумайте код доступа';
+        document.getElementById('loginPassword').placeholder = hasPasscode ? 'Введите код доступа' : 'Не менее 4 символов';
+        document.getElementById('loginPassword').autocomplete = hasPasscode ? 'current-password' : 'new-password';
+        document.getElementById('loginHint').textContent = hasPasscode
+            ? 'Код действует только в этом браузере.'
+            : 'Код будет сохранён в этом браузере только как SHA-256-хеш.';
+        document.getElementById('loginSubmit').textContent = hasPasscode ? 'Войти' : 'Создать код';
+    }
+
+    function updateAuthUI() {
+        const status = document.getElementById('authStatus');
+        const btn = document.getElementById('loginBtn');
+        const icon = document.getElementById('loginIcon');
+        const label = document.getElementById('loginLabel');
+
+        const authBlock = document.getElementById('authRequiredSections');
+
+        if (state.authenticated) {
+            status.textContent = '✅ Авторизован';
+            status.className = 'auth-status authorized';
+            btn.classList.add('logged-in');
+            icon.textContent = '🚪';
+            label.textContent = 'Выйти';
+            authBlock.classList.remove('hidden');
+            startInactivityTimer();
+            loadRecords();
+            renderTable();
+            updateStats();
+        } else {
+            status.textContent = '🔒 Требуется вход';
+            status.className = 'auth-status unauthorized';
+            btn.classList.remove('logged-in');
+            icon.textContent = '🔐';
+            label.textContent = 'Войти';
+            authBlock.classList.add('hidden');
+            clearInactivityTimer();
+            document.getElementById('recordsBody').innerHTML =
+                '<tr><td colspan="8" style="text-align:center; color:var(--text-light); padding:15px;">Нет сохранённых записей</td></tr>';
+            // Обнуляем виджеты
+            ['dayDist','dayCharge','dayFuel','weekDist','weekCharge','weekFuel','monthDist','monthCharge','monthFuel'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '0 км';
+            });
+        }
+    }
+
+    async function login(password) {
+        const error = document.getElementById('loginError');
+        if (password.length < 4) {
+            error.textContent = 'Введите код не короче 4 символов';
+            error.style.display = 'block';
+            return;
+        }
+
+        const storedHash = localStorage.getItem(PASSCODE_HASH_KEY);
+        const enteredHash = await hashPasscode(password);
+        const isFirstLogin = !storedHash;
+
+        if (isFirstLogin || storedHash === enteredHash) {
+            if (isFirstLogin) localStorage.setItem(PASSCODE_HASH_KEY, enteredHash);
+            state.authenticated = true;
+            saveSettings();
+            updateAuthUI();
+            document.getElementById('loginModal').classList.remove('active');
+            error.style.display = 'none';
+            showToast(isFirstLogin ? 'Код доступа создан' : 'Добро пожаловать!', 'success');
+        } else {
+            error.textContent = 'Неверный код доступа';
+            error.style.display = 'block';
+        }
+    }
+
+    function logout() {
+        state.authenticated = false;
+        saveSettings();
+        updateAuthUI();
+        clearInactivityTimer();
+        showToast('Вы вышли из системы', 'warning');
+    }
+
+    function resetInactivityTimer() {
+        if (state.authenticated) {
+            clearTimeout(state.inactivityTimeout);
+            state.inactivityTimeout = setTimeout(() => {
+                logout();
+                showToast('Сессия завершена из-за бездействия', 'warning');
+            }, state.inactivityDelay);
+        }
+    }
+
+    function startInactivityTimer() {
+        resetInactivityTimer();
+        const events = ['mousemove', 'click', 'keydown', 'scroll', 'touchstart'];
+        events.forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, { passive: true });
+        });
+    }
+
+    function clearInactivityTimer() {
+        clearTimeout(state.inactivityTimeout);
+    }
+
+    // ==========================================
+    // 3. ПОГОДА
+    // ==========================================
+    async function fetchWeather() {
+        try {
+            const resp = await fetch('https://api.open-meteo.com/v1/forecast?latitude=55.75&longitude=37.62&current_weather=true&timezone=Europe/Moscow');
+            if (!resp.ok) throw new Error('Ошибка получения погоды');
+            const data = await resp.json();
+            const temp = data.current_weather.temperature;
+            const code = data.current_weather.weathercode;
+
+            const weatherMap = {
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+                45: '🌫️', 48: '🌫️',
+                51: '🌦️', 53: '🌦️', 55: '🌧️',
+                56: '🌧️', 57: '🌧️',
+                61: '🌦️', 63: '🌧️', 65: '🌧️',
+                66: '🌧️', 67: '🌧️',
+                71: '❄️', 73: '❄️', 75: '❄️',
+                77: '🌨️',
+                80: '🌦️', 81: '🌧️', 82: '🌧️',
+                85: '🌨️', 86: '🌨️',
+                95: '⛈️', 96: '⛈️', 99: '⛈️'
+            };
+            const icon = weatherMap[code] || '🌡️';
+            let descText = 'ясно';
+            if (code >= 51 && code <= 67) descText = 'дождь';
+            else if (code >= 71 && code <= 77) descText = 'снег';
+            else if (code >= 80 && code <= 82) descText = 'ливень';
+            else if (code >= 85 && code <= 86) descText = 'снегопад';
+            else if (code >= 95) descText = 'гроза';
+            else if (code === 3 || code === 2) descText = 'облачно';
+            else if (code === 1) descText = 'переменная облачность';
+            else if (code === 0) descText = 'ясно';
+            else if (code === 45 || code === 48) descText = 'туман';
+
+            document.getElementById('weatherIcon').textContent = icon;
+            document.getElementById('weatherTemp').textContent = Math.round(temp) + '°C';
+            document.getElementById('weatherDesc').textContent = descText;
+        } catch(e) {
+            console.warn('Ошибка получения погоды:', e);
+            document.getElementById('weatherIcon').textContent = '⚠️';
+            document.getElementById('weatherTemp').textContent = '--°C';
+            document.getElementById('weatherDesc').textContent = 'недоступно';
+        }
+    }
+    fetchWeather();
+    setInterval(fetchWeather, 600000);
+
+    // ==========================================
+    // 4. ЧАСЫ
+    // ==========================================
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('current-date').textContent = now.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' });
+        document.getElementById('current-time').textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        autoThemeCheck();
+    }
+
+    // ==========================================
+    // 5. РАБОТА С ЗАПИСЯМИ (localStorage)
+    // ==========================================
+    const STORAGE_KEY = 'trip_records_analysis';
+
+    function getRecords() {
+        try {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveRecordsToStorage(records) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function addRecord(record) {
+        const records = getRecords();
+        record.id = Date.now();
+        record.timestamp = Date.now();
+        records.push(record);
+        saveRecordsToStorage(records);
+        renderTable();
+        updateStats();
+    }
+
+    function deleteRecord(id) {
+        let records = getRecords();
+        records = records.filter(r => r.id !== id);
+        saveRecordsToStorage(records);
+        renderTable();
+        updateStats();
+    }
+
+    function clearAllRecords() {
+        if (confirm('Удалить все сохранённые записи?')) {
+            saveRecordsToStorage([]);
+            renderTable();
+            updateStats();
+        }
+    }
+
+    function loadRecords() {
+        return getRecords();
+    }
+
+    // ==========================================
+    // 6. РАСПОЗНАВАНИЕ И ПАРСИНГ
+    // ==========================================
+    function parseAndFillFields(text) {
+        const fields = {
+            tripDate: document.getElementById('tripDate'),
+            startTime: document.getElementById('startTime'),
+            endTime: document.getElementById('endTime'),
+            duration: document.getElementById('duration'),
+            distance: document.getElementById('distance'),
+            chargeStart: document.getElementById('chargeStart'),
+            chargeEnd: document.getElementById('chargeEnd'),
+            chargeUsed: document.getElementById('chargeUsed'),
+            fuelStart: document.getElementById('fuelStart'),
+            fuelEnd: document.getElementById('fuelEnd'),
+            fuelUsed: document.getElementById('fuelUsed')
+        };
+
+        for (const input of Object.values(fields)) {
+            input.classList.remove('found');
+        }
+
+        const found = {};
+        const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+        let startLine = '', endLine = '', durationLine = '', distanceLine = '';
+        let chargeStartLine = '', chargeEndLine = '', fuelStartLine = '', fuelEndLine = '';
+
+        for (const line of lines) {
+            const lowerLine = line.toLowerCase();
+            if (lowerLine.includes('старт') || lowerLine.includes('начало')) startLine = line;
+            else if (lowerLine.includes('финиш') || lowerLine.includes('конец')) endLine = line;
+            else if (lowerLine.includes('продолжительность') || lowerLine.includes('длительность')) durationLine = line;
+            else if (lowerLine.includes('расстояние') || lowerLine.includes('пробег') || lowerLine.includes('километр')) distanceLine = line;
+            else if (lowerLine.includes('начальный уровень заряда') || lowerLine.includes('начальный заряд') || (lowerLine.includes('заряд') && lowerLine.includes('нач'))) chargeStartLine = line;
+            else if (lowerLine.includes('конечный уровень заряда') || lowerLine.includes('конечный заряд') || (lowerLine.includes('заряд') && lowerLine.includes('кон'))) chargeEndLine = line;
+            else if (lowerLine.includes('начальный уровень топлива') || lowerLine.includes('начальный топлив') || (lowerLine.includes('топлив') && lowerLine.includes('нач'))) fuelStartLine = line;
+            else if (lowerLine.includes('конечный уровень топлива') || lowerLine.includes('конечный топлив') || (lowerLine.includes('топлив') && lowerLine.includes('кон'))) fuelEndLine = line;
+        }
+
+        if (startLine) {
+            const datePattern = /\b(\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{4}|\d{1,2}\.\d{1,2}\.\d{4})\b/;
+            const dateMatch = startLine.match(datePattern);
+            if (dateMatch) found.tripDate = dateMatch[0];
+
+            const timeAfterCommaPattern = /,\s*(\d{1,2}[:.]\d{2})/;
+            const timeAfterCommaMatch = startLine.match(timeAfterCommaPattern);
+            if (timeAfterCommaMatch) {
+                found.startTime = timeAfterCommaMatch[1].replace('.', ':');
+            } else {
+                const timePattern = /\b(\d{1,2}[:.]\d{2})\b/;
+                const timeMatch = startLine.match(timePattern);
+                if (timeMatch) {
+                    found.startTime = timeMatch[0].replace('.', ':');
+                }
+            }
+        }
+
+        if (endLine) {
+            const timeAfterCommaPattern = /,\s*(\d{1,2}[:.]\d{2})/;
+            const timeAfterCommaMatch = endLine.match(timeAfterCommaPattern);
+            if (timeAfterCommaMatch) {
+                found.endTime = timeAfterCommaMatch[1].replace('.', ':');
+            } else {
+                const timePattern = /\b(\d{1,2}[:.]\d{2})\b/;
+                const timeMatch = endLine.match(timePattern);
+                if (timeMatch) {
+                    found.endTime = timeMatch[0].replace('.', ':');
+                }
+            }
+        }
+
+        if (durationLine) {
+            const durationPattern = /\b(\d{1,2}[:.]\d{2}|\d+\s*(?:мин|минут|ч|час))\b/;
+            const durationMatch = durationLine.match(durationPattern);
+            if (durationMatch) {
+                found.duration = durationMatch[0].replace('.', ':');
+            }
+        }
+
+        if (distanceLine) {
+            const distancePattern = /(\d+[.,]?\d*)\s*(?:км|km|километр)/i;
+            const distanceMatch = distanceLine.match(distancePattern);
+            if (distanceMatch) {
+                found.distance = distanceMatch[1].replace(',', '.');
+            }
+        }
+
+        if (chargeStartLine) {
+            const percentPattern = /(\d+)\s*%/;
+            const percentMatch = chargeStartLine.match(percentPattern);
+            if (percentMatch) found.chargeStart = percentMatch[1];
+        }
+
+        if (chargeEndLine) {
+            const percentPattern = /(\d+)\s*%/;
+            const percentMatch = chargeEndLine.match(percentPattern);
+            if (percentMatch) found.chargeEnd = percentMatch[1];
+        }
+
+        if (fuelStartLine) {
+            const percentPattern = /(\d+)\s*%/;
+            const percentMatch = fuelStartLine.match(percentPattern);
+            if (percentMatch) found.fuelStart = percentMatch[1];
+        }
+
+        if (fuelEndLine) {
+            const percentPattern = /(\d+)\s*%/;
+            const percentMatch = fuelEndLine.match(percentPattern);
+            if (percentMatch) found.fuelEnd = percentMatch[1];
+        }
+
+        if (found.chargeStart && found.chargeEnd) {
+            const diff = parseFloat(found.chargeStart) - parseFloat(found.chargeEnd);
+            if (!isNaN(diff) && diff >= 0) found.chargeUsed = diff.toString();
+        }
+
+        if (found.fuelStart && found.fuelEnd) {
+            const diff = parseFloat(found.fuelStart) - parseFloat(found.fuelEnd);
+            if (!isNaN(diff) && diff >= 0) found.fuelUsed = diff.toString();
+        }
+
+        let filledCount = 0;
+        for (const [key, value] of Object.entries(found)) {
+            if (fields[key] && value) {
+                fields[key].value = value;
+                fields[key].classList.add('found');
+                filledCount++;
+            }
+        }
+
+        return { found, filledCount };
+    }
+
+    // ==========================================
+    // 7. СТАТИСТИКА (групповые виджеты)
+    // ==========================================
+    function updateStats() {
+        if (!state.authenticated) {
+            ['dayDist','dayCharge','dayFuel','weekDist','weekCharge','weekFuel','monthDist','monthCharge','monthFuel'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '0 км';
+            });
+            return;
+        }
+        const records = getRecords();
+        if (records.length === 0) {
+            // Обнуляем
+            ['dayDist','dayCharge','dayFuel','weekDist','weekCharge','weekFuel','monthDist','monthCharge','monthFuel'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '0 км';
+            });
+            return;
+        }
+
+        // Функция для фильтрации записей за последние N дней
+        function filterByDays(days) {
+            const now = new Date();
+            const cutoff = new Date(now);
+            cutoff.setDate(cutoff.getDate() - days);
+            return records.filter(r => {
+                if (!r.tripDate) return false;
+                const parts = r.tripDate.split('.');
+                if (parts.length === 3) {
+                    const d = new Date(parts[2], parts[1]-1, parts[0]);
+                    return d >= cutoff;
+                }
+                return false;
+            });
+        }
+
+        // Все записи (за день — все)
+        const all = records;
+        const totalDist = all.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+        const totalCharge = all.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
+        const totalFuel = all.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
+        const cnt = all.length;
+        document.getElementById('dayDist').textContent = (cnt ? totalDist / cnt : 0).toFixed(1) + ' км';
+        document.getElementById('dayCharge').textContent = (cnt ? totalCharge / cnt : 0).toFixed(1) + ' %';
+        document.getElementById('dayFuel').textContent = (cnt ? totalFuel / cnt : 0).toFixed(1) + ' %';
+
+        // За неделю (7 дней)
+        const weekRecs = filterByDays(7);
+        if (weekRecs.length) {
+            const wDist = weekRecs.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+            const wCharge = weekRecs.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
+            const wFuel = weekRecs.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
+            const wc = weekRecs.length;
+            document.getElementById('weekDist').textContent = (wc ? wDist / wc : 0).toFixed(1) + ' км';
+            document.getElementById('weekCharge').textContent = (wc ? wCharge / wc : 0).toFixed(1) + ' %';
+            document.getElementById('weekFuel').textContent = (wc ? wFuel / wc : 0).toFixed(1) + ' %';
+        } else {
+            document.getElementById('weekDist').textContent = '0 км';
+            document.getElementById('weekCharge').textContent = '0 %';
+            document.getElementById('weekFuel').textContent = '0 %';
+        }
+
+        // За месяц (30 дней)
+        const monthRecs = filterByDays(30);
+        if (monthRecs.length) {
+            const mDist = monthRecs.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+            const mCharge = monthRecs.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
+            const mFuel = monthRecs.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
+            const mc = monthRecs.length;
+            document.getElementById('monthDist').textContent = (mc ? mDist / mc : 0).toFixed(1) + ' км';
+            document.getElementById('monthCharge').textContent = (mc ? mCharge / mc : 0).toFixed(1) + ' %';
+            document.getElementById('monthFuel').textContent = (mc ? mFuel / mc : 0).toFixed(1) + ' %';
+        } else {
+            document.getElementById('monthDist').textContent = '0 км';
+            document.getElementById('monthCharge').textContent = '0 %';
+            document.getElementById('monthFuel').textContent = '0 %';
+        }
+    }
+
+    // ==========================================
+    // 8. ОТРИСОВКА ТАБЛИЦЫ
+    // ==========================================
+    function renderTable() {
+        if (!state.authenticated) return;
+        let records = getRecords();
+        const tbody = document.getElementById('recordsBody');
+        
+        if (state.sortOrder === 'desc') {
+            records.sort((a, b) => {
+                const dateA = a.tripDate || '';
+                const dateB = b.tripDate || '';
+                return dateB.localeCompare(dateA);
+            });
+        } else {
+            records.sort((a, b) => {
+                const dateA = a.tripDate || '';
+                const dateB = b.tripDate || '';
+                return dateA.localeCompare(dateB);
+            });
+        }
+        
+        if (records.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-light); padding:15px;">Нет сохранённых записей</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        records.forEach(record => {
+            let chargeTooltip = '', fuelTooltip = '';
+            if (record.chargeStart || record.chargeEnd) {
+                chargeTooltip = `Начальный уровень заряда: ${record.chargeStart || '0'} %\nКонечный уровень заряда: ${record.chargeEnd || '0'} %`;
+            }
+            if (record.fuelStart || record.fuelEnd) {
+                fuelTooltip = `Начальный уровень топлива: ${record.fuelStart || '0'} %\nКонечный уровень топлива: ${record.fuelEnd || '0'} %`;
+            }
+
+            html += `
+                <tr>
+                    <td>${escapeHtml(record.tripDate || '')}</td>
+                    <td>${escapeHtml(record.startTime || '')}</td>
+                    <td>${escapeHtml(record.endTime || '')}</td>
+                    <td>${escapeHtml(record.duration || '')}</td>
+                    <td>${escapeHtml(record.distance || '')}</td>
+                    <td>
+                        ${chargeTooltip ? `
+                            <span class="tooltip-container" data-tooltip="${escapeHtml(chargeTooltip.replace(/\n/g, '<br>'))}">
+                                ${escapeHtml(record.chargeUsed || '0')}
+                            </span>
+                        ` : escapeHtml(record.chargeUsed || '0')}
+                    </td>
+                    <td>
+                        ${fuelTooltip ? `
+                            <span class="tooltip-container" data-tooltip="${escapeHtml(fuelTooltip.replace(/\n/g, '<br>'))}">
+                                ${escapeHtml(record.fuelUsed || '0')}
+                            </span>
+                        ` : escapeHtml(record.fuelUsed || '0')}
+                    </td>
+                    <td>
+                        <button class="delete-btn" data-id="${record.id}">Удалить</button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+
+        document.querySelectorAll('.tooltip-container').forEach(el => {
+            el.addEventListener('mouseenter', function(e) {
+                const text = this.getAttribute('data-tooltip');
+                if (text) showTooltipHtml(text, e.clientX, e.clientY);
+            });
+            el.addEventListener('mousemove', function(e) {
+                const text = this.getAttribute('data-tooltip');
+                if (text) showTooltipHtml(text, e.clientX, e.clientY);
+            });
+            el.addEventListener('mouseleave', hideTooltip);
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = parseInt(this.getAttribute('data-id'), 10);
+                deleteRecord(id);
+            });
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ==========================================
+    // 9. TOAST
+    // ==========================================
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast ' + type;
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    // ==========================================
+    // 10. ЯНДЕКС ДИСК (облако)
+    // ==========================================
+    const YANDEX_BACKUP_PATH = 'app:/trip_data.json';
+
+    function getYandexToken() {
+        return localStorage.getItem('yandexToken') || null;
+    }
+
+    function setYandexToken(token) {
+        if (token) {
+            localStorage.setItem('yandexToken', token);
+        } else {
+            localStorage.removeItem('yandexToken');
+        }
+    }
+
+    function showTokenModal() {
+        document.getElementById('tokenModal').classList.add('active');
+        document.getElementById('yandexTokenInput').value = '';
+        document.getElementById('tokenError').style.display = 'none';
+        document.getElementById('yandexTokenInput').focus();
+    }
+
+    function hideTokenModal() {
+        document.getElementById('tokenModal').classList.remove('active');
+    }
+
+    async function checkYandexResponse(response, operation) {
+        if (response.ok) return;
+        if (response.status === 401) {
+            setYandexToken(null);
+            throw new Error('Токен недействителен или истёк. Укажите новый OAuth-токен.');
+        }
+        if (response.status === 403) {
+            throw new Error('Нет доступа к Яндекс Диску. Проверьте права OAuth-токена.');
+        }
+        if (response.status === 404 && operation === 'load') {
+            throw new Error('Файл резервной копии не найден. Сначала сохраните данные на Яндекс Диск.');
+        }
+        throw new Error(`Ошибка Яндекс Диска: HTTP ${response.status}.`);
+    }
+
+    async function saveToYandexDisk(data) {
+        const token = getYandexToken();
+        if (!token) {
+            window._pendingCloudAction = 'save';
+            showTokenModal();
+            return false;
+        }
+        try {
+            showToast('⏳ Сохраняю данные на Яндекс Диск...', 'warning');
+            const uploadUrlResponse = await fetch(
+                'https://cloud-api.yandex.net/v1/disk/resources/upload?path=' +
+                encodeURIComponent(YANDEX_BACKUP_PATH) +
+                '&overwrite=true',
+                { method: 'GET', headers: { 'Authorization': `OAuth ${token}` } }
+            );
+            await checkYandexResponse(uploadUrlResponse, 'save');
+            const uploadInfo = await uploadUrlResponse.json();
+            if (!uploadInfo.href) {
+                throw new Error('Яндекс Диск не вернул ссылку для загрузки файла.');
+            }
+            const uploadResponse = await fetch(uploadInfo.href, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                body: JSON.stringify(data, null, 2)
+            });
+            if (!uploadResponse.ok) {
+                throw new Error(`Не удалось сохранить файл: HTTP ${uploadResponse.status}.`);
+            }
+            showToast('✅ Данные сохранены в Яндекс Диск!', 'success');
+            return true;
+        } catch (error) {
+            console.error('Ошибка сохранения:', error);
+            showToast('❌ Сохранение не выполнено: ' + error.message, 'error');
+            if (!getYandexToken()) showTokenModal();
+            return false;
+        }
+    }
+
+    async function loadFromYandexDisk() {
+        const token = getYandexToken();
+        if (!token) {
+            window._pendingCloudAction = 'load';
+            showTokenModal();
+            return null;
+        }
+        try {
+            showToast('⏳ Загружаю данные с Яндекс Диска...', 'warning');
+            const downloadUrlResponse = await fetch(
+                'https://cloud-api.yandex.net/v1/disk/resources/download?path=' +
+                encodeURIComponent(YANDEX_BACKUP_PATH),
+                { method: 'GET', headers: { 'Authorization': `OAuth ${token}` } }
+            );
+            await checkYandexResponse(downloadUrlResponse, 'load');
+            const downloadInfo = await downloadUrlResponse.json();
+            if (!downloadInfo.href) {
+                throw new Error('Яндекс Диск не вернул ссылку для скачивания файла.');
+            }
+            const fileResponse = await fetch(downloadInfo.href);
+            if (!fileResponse.ok) {
+                throw new Error(`Не удалось скачать резервную копию: HTTP ${fileResponse.status}.`);
+            }
+            const data = await fileResponse.json();
+            showToast('✅ Данные загружены с Яндекс Диска!', 'success');
+            return data;
+        } catch (error) {
+            console.error('Ошибка загрузки:', error);
+            showToast('❌ Загрузка не выполнена: ' + error.message, 'error');
+            if (!getYandexToken()) showTokenModal();
+            return null;
+        }
+    }
+
+    function getCurrentData() {
+        return {
+            version: '1.0',
+            exported: new Date().toISOString(),
+            records: getRecords()
+        };
+    }
+
+    function applyCloudData(data) {
+        if (!data.records || !Array.isArray(data.records)) {
+            throw new Error('Неверный формат данных');
+        }
+        saveRecordsToStorage(data.records);
+        renderTable();
+        updateStats();
+        showToast(`✅ Загружено ${data.records.length} записей`, 'success');
+    }
+
+    // ==========================================
+    // 11. ДИАГРАММА С ВОЗМОЖНОСТЬЮ ВЫБОРА ТИПА И СРЕДНИХ
+    // ==========================================
+    let chartInstance = null;
+
+    function openChartModal() {
+        if (!state.authenticated) {
+            showToast('Требуется авторизация', 'warning');
+            return;
+        }
+        const records = getRecords();
+        if (records.length === 0) {
+            showToast('Нет данных для построения диаграммы', 'warning');
+            return;
+        }
+        document.getElementById('chartModal').classList.add('active');
+        renderChart(records);
+    }
+
+    function closeChartModal() {
+        document.getElementById('chartModal').classList.remove('active');
+        if (chartInstance) {
+            chartInstance.destroy();
+            chartInstance = null;
+        }
+    }
+
+    function renderChart(records) {
+        const grouped = {};
+        records.forEach(r => {
+            if (!r.tripDate) return;
+            const date = r.tripDate;
+            if (!grouped[date]) {
+                grouped[date] = { distance: 0, charge: 0, fuel: 0 };
+            }
+            grouped[date].distance += parseFloat(r.distance) || 0;
+            grouped[date].charge += parseFloat(r.chargeUsed) || 0;
+            grouped[date].fuel += parseFloat(r.fuelUsed) || 0;
+        });
+
+        const sortedDates = Object.keys(grouped).sort((a, b) => {
+            const partsA = a.split('.');
+            const partsB = b.split('.');
+            if (partsA.length === 3 && partsB.length === 3) {
+                const dA = new Date(partsA[2], partsA[1]-1, partsA[0]);
+                const dB = new Date(partsB[2], partsB[1]-1, partsB[0]);
+                return dA - dB;
+            }
+            return a.localeCompare(b);
+        });
+
+        const labels = sortedDates;
+        const distData = sortedDates.map(d => grouped[d].distance);
+        const chargeData = sortedDates.map(d => grouped[d].charge);
+        const fuelData = sortedDates.map(d => grouped[d].fuel);
+
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#0b1a33';
+        const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-grid-color').trim() || '#dce3ef';
+
+        const showDist = document.getElementById('chkDistance').checked;
+        const showCharge = document.getElementById('chkCharge').checked;
+        const showFuel = document.getElementById('chkFuel').checked;
+        const chartType = document.querySelector('input[name="chartType"]:checked').value;
+        const showAvg = document.getElementById('chkAvg').checked;
+
+        const datasets = [];
+        const avgData = {};
+
+        // Подготовка данных
+        const distAvg = distData.length ? distData.reduce((a,b)=>a+b,0)/distData.length : 0;
+        const chargeAvg = chargeData.length ? chargeData.reduce((a,b)=>a+b,0)/chargeData.length : 0;
+        const fuelAvg = fuelData.length ? fuelData.reduce((a,b)=>a+b,0)/fuelData.length : 0;
+
+        // Серия "Пробег"
+        if (showDist) {
+            datasets.push({
+                label: 'Пробег, км',
+                data: distData,
+                backgroundColor: 'rgba(74, 123, 196, 0.7)',
+                borderColor: '#4a7bc4',
+                borderWidth: 1,
+                yAxisID: 'y',
+                type: chartType,
+            });
+            avgData.dist = distAvg;
+        }
+        // Серия "Заряд"
+        if (showCharge) {
+            datasets.push({
+                label: 'Расход зарядки, %',
+                data: chargeData,
+                backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                borderColor: '#2ecc71',
+                borderWidth: 1,
+                yAxisID: 'y1',
+                type: chartType,
+            });
+            avgData.charge = chargeAvg;
+        }
+        // Серия "Топливо"
+        if (showFuel) {
+            datasets.push({
+                label: 'Расход топлива, %',
+                data: fuelData,
+                backgroundColor: 'rgba(230, 126, 34, 0.7)',
+                borderColor: '#e67e22',
+                borderWidth: 1,
+                yAxisID: 'y1',
+                type: chartType,
+            });
+            avgData.fuel = fuelAvg;
+        }
+
+        // Добавляем линии средних значений
+        if (showAvg) {
+            // Для каждой активной серии добавим линию среднего
+            if (showDist && distData.length) {
+                datasets.push({
+                    label: 'Ср. пробег',
+                    data: Array(distData.length).fill(distAvg),
+                    borderColor: '#4a7bc4',
+                    borderWidth: 2,
+                    borderDash: [5,5],
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'y',
+                    type: 'line',
+                });
+            }
+            if (showCharge && chargeData.length) {
+                datasets.push({
+                    label: 'Ср. заряд',
+                    data: Array(chargeData.length).fill(chargeAvg),
+                    borderColor: '#2ecc71',
+                    borderWidth: 2,
+                    borderDash: [5,5],
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'y1',
+                    type: 'line',
+                });
+            }
+            if (showFuel && fuelData.length) {
+                datasets.push({
+                    label: 'Ср. топливо',
+                    data: Array(fuelData.length).fill(fuelAvg),
+                    borderColor: '#e67e22',
+                    borderWidth: 2,
+                    borderDash: [5,5],
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'y1',
+                    type: 'line',
+                });
+            }
+        }
+
+        if (datasets.length === 0) {
+            datasets.push({
+                label: 'Нет данных для отображения',
+                data: [],
+                backgroundColor: 'transparent',
+                borderColor: 'transparent',
+            });
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: chartType,
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: datasets.length > 0 && datasets[0].label !== 'Нет данных для отображения' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: textColor,
+                            maxRotation: 45,
+                            font: { size: 10 }
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        beginAtZero: true,
+                        grid: { color: gridColor },
+                        ticks: { color: textColor, font: { size: 10 } },
+                        title: {
+                            display: showDist,
+                            text: 'Пробег, км',
+                            color: textColor
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: textColor, font: { size: 10 } },
+                        title: {
+                            display: showCharge || showFuel,
+                            text: 'Расход, %',
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+
+        // Обработчики на чекбоксы и радио
+        document.querySelectorAll('#chkDistance, #chkCharge, #chkFuel, #chkAvg, input[name="chartType"]').forEach(el => {
+            el.onchange = function() {
+                renderChart(getRecords());
+            };
+        });
+    }
+
+    // ==========================================
+    // 12. ОБРАБОТЧИКИ
+    // ==========================================
+    document.getElementById('loginBtn').addEventListener('click', function() {
+        if (state.authenticated) {
+            logout();
+        } else {
+            updateLoginModalMode();
+            document.getElementById('loginModal').classList.add('active');
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginPassword').value = '';
+            setTimeout(() => document.getElementById('loginPassword').focus(), 0);
+        }
+    });
+
+    document.getElementById('loginModalClose').addEventListener('click', function() {
+        document.getElementById('loginModal').classList.remove('active');
+    });
+
+    document.getElementById('loginModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+    });
+
+    document.getElementById('loginSubmit').addEventListener('click', async function() {
+        const password = document.getElementById('loginPassword').value.trim();
+        this.disabled = true;
+        try {
+            await login(password);
+        } finally {
+            this.disabled = false;
+        }
+    });
+
+    document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('loginSubmit').click();
+        }
+    });
+
+    document.getElementById('settingsBtn').addEventListener('click', function() {
+        document.getElementById('settingsModal').classList.add('active');
+        const currentToken = getYandexToken();
+        if (currentToken) {
+            document.getElementById('yandexTokenInputSettings').value = '••••••••••••••••';
+        } else {
+            document.getElementById('yandexTokenInputSettings').value = '';
+        }
+        document.getElementById('tokenSettingsError').style.display = 'none';
+    });
+
+    document.getElementById('settingsClose').addEventListener('click', function() {
+        document.getElementById('settingsModal').classList.remove('active');
+    });
+
+    document.getElementById('settingsModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+    });
+
+    document.getElementById('saveTokenSettingsBtn').addEventListener('click', function() {
+        const token = document.getElementById('yandexTokenInputSettings').value.trim();
+        if (!token || token === '••••••••••••••••') {
+            document.getElementById('tokenSettingsError').style.display = 'block';
+            document.getElementById('tokenSettingsError').textContent = 'Введите действительный токен';
+            return;
+        }
+        document.getElementById('tokenSettingsError').style.display = 'none';
+        setYandexToken(token);
+        document.getElementById('settingsModal').classList.remove('active');
+        showToast('✅ Токен сохранён', 'success');
+    });
+
+    document.getElementById('resetTokenSettingsBtn').addEventListener('click', function() {
+        setYandexToken(null);
+        document.getElementById('yandexTokenInputSettings').value = '';
+        document.getElementById('settingsModal').classList.remove('active');
+        showToast('🔄 Токен сброшен', 'warning');
+    });
+
+    document.getElementById('tokenModalClose').addEventListener('click', hideTokenModal);
+    document.getElementById('tokenModal').addEventListener('click', function(e) {
+        if (e.target === this) hideTokenModal();
+    });
+
+    document.getElementById('tokenSubmit').addEventListener('click', function() {
+        const token = document.getElementById('yandexTokenInput').value.trim();
+        if (!token) {
+            document.getElementById('tokenError').style.display = 'block';
+            return;
+        }
+        document.getElementById('tokenError').style.display = 'none';
+        setYandexToken(token);
+        hideTokenModal();
+        showToast('✅ Токен сохранён', 'success');
+        if (window._pendingCloudAction) {
+            const action = window._pendingCloudAction;
+            window._pendingCloudAction = null;
+            if (action === 'save') {
+                saveToYandexDisk(getCurrentData());
+            } else if (action === 'load') {
+                loadFromYandexDisk().then(data => {
+                    if (data) applyCloudData(data);
+                });
+            }
+        }
+    });
+
+    document.getElementById('yandexTokenInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('tokenSubmit').click();
+        }
+    });
+
+    document.getElementById('saveCloudBtn').addEventListener('click', function() {
+        if (!state.authenticated) {
+            showToast('Требуется авторизация', 'warning');
+            return;
+        }
+        saveToYandexDisk(getCurrentData());
+    });
+
+    document.getElementById('loadCloudBtn').addEventListener('click', function() {
+        if (!state.authenticated) {
+            showToast('Требуется авторизация', 'warning');
+            return;
+        }
+        loadFromYandexDisk().then(data => {
+            if (data) applyCloudData(data);
+        });
+    });
+
+    document.getElementById('sortDateBtn').addEventListener('click', function() {
+        state.sortOrder = state.sortOrder === 'desc' ? 'asc' : 'desc';
+        this.textContent = state.sortOrder === 'desc' ? '⬇' : '⬆';
+        renderTable();
+    });
+
+    document.getElementById('chartBtn').addEventListener('click', openChartModal);
+    document.getElementById('chartModalClose').addEventListener('click', closeChartModal);
+    document.getElementById('chartModal').addEventListener('click', function(e) {
+        if (e.target === this) closeChartModal();
+    });
+
+    // Распознавание
+    let currentFile = null;
+    const imageInput = document.getElementById('imageInput');
+
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            currentFile = file;
+            document.getElementById('previewContainer').innerHTML = '';
+            document.getElementById('statusMessage').textContent = '✅ Изображение загружено. Нажмите "Распознать"';
+            document.getElementById('statusMessage').className = 'status success';
+        } else {
+            currentFile = null;
+            document.getElementById('previewContainer').innerHTML = '';
+            document.getElementById('statusMessage').textContent = '';
+            document.getElementById('statusMessage').className = 'status';
+        }
+    });
+
+    document.getElementById('recognizeBtn').addEventListener('click', async function() {
+        if (!currentFile) {
+            document.getElementById('statusMessage').textContent = '⚠️ Сначала выберите изображение.';
+            document.getElementById('statusMessage').className = 'status error';
+            return;
+        }
+
+        this.disabled = true;
+        this.textContent = '⏳ Распознавание...';
+        document.getElementById('statusMessage').textContent = '⏳ Идёт распознавание...';
+        document.getElementById('statusMessage').className = 'status';
+        document.getElementById('ocrText').value = '';
+        document.getElementById('ocrStatus').textContent = '⏳';
+        document.getElementById('debugLog').textContent = '📋 Лог распознавания...';
+
+        try {
+            const result = await Tesseract.recognize(
+                currentFile,
+                'rus+eng',
+                {
+                    tessedit_pageseg_mode: '6',
+                    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя.,:;()-+% ',
+                }
+            );
+
+            const text = result.data.text;
+            document.getElementById('ocrText').value = text;
+            document.getElementById('ocrStatus').textContent = '✅ Распознано';
+            document.getElementById('debugLog').textContent = '📋 Лог распознавания...\n📄 Текст распознан успешно';
+
+            const { filledCount } = parseAndFillFields(text);
+            document.getElementById('statusMessage').textContent = `✅ Заполнено ${filledCount} полей. Проверьте и сохраните.`;
+            document.getElementById('statusMessage').className = 'status success';
+        } catch (error) {
+            console.error('Ошибка распознавания:', error);
+            document.getElementById('statusMessage').textContent = '❌ Ошибка распознавания. Попробуйте другое изображение.';
+            document.getElementById('statusMessage').className = 'status error';
+            document.getElementById('ocrText').value = '';
+            document.getElementById('ocrStatus').textContent = '❌';
+            document.getElementById('debugLog').textContent = '📋 Лог распознавания...\n❌ Ошибка: ' + error.message;
+        } finally {
+            this.disabled = false;
+            this.textContent = '🚀 Распознать и заполнить';
+        }
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', function() {
+        if (!state.authenticated) {
+            showToast('Требуется авторизация', 'warning');
+            return;
+        }
+
+        const fields = {
+            tripDate: document.getElementById('tripDate'),
+            startTime: document.getElementById('startTime'),
+            endTime: document.getElementById('endTime'),
+            duration: document.getElementById('duration'),
+            distance: document.getElementById('distance'),
+            chargeStart: document.getElementById('chargeStart'),
+            chargeEnd: document.getElementById('chargeEnd'),
+            chargeUsed: document.getElementById('chargeUsed'),
+            fuelStart: document.getElementById('fuelStart'),
+            fuelEnd: document.getElementById('fuelEnd'),
+            fuelUsed: document.getElementById('fuelUsed')
+        };
+
+        const record = {};
+        let hasData = false;
+        for (const [key, input] of Object.entries(fields)) {
+            const val = input.value.trim();
+            record[key] = val;
+            if (val) hasData = true;
+        }
+
+        if (!hasData) {
+            alert('Заполните хотя бы одно поле перед сохранением.');
+            return;
+        }
+
+        addRecord(record);
+        for (const input of Object.values(fields)) {
+            input.value = '';
+            input.classList.remove('found');
+        }
+        document.getElementById('statusMessage').textContent = '✅ Запись сохранена!';
+        document.getElementById('statusMessage').className = 'status success';
+        showToast('✅ Запись сохранена', 'success');
+    });
+
+    document.getElementById('clearFieldsBtn').addEventListener('click', function() {
+        const fields = ['tripDate', 'startTime', 'endTime', 'duration', 'distance', 'chargeStart', 'chargeEnd', 'chargeUsed', 'fuelStart', 'fuelEnd', 'fuelUsed'];
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = '';
+                el.classList.remove('found');
+            }
+        });
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', clearAllRecords);
+
+    // ==========================================
+    // 13. ИНИЦИАЛИЗАЦИЯ
+    // ==========================================
+    function init() {
+        loadSettings();
+        autoThemeCheck();
+
+        state.authenticated = false;
+        updateAuthUI();
+
+        updateClock();
+        setInterval(updateClock, 10000);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();
+</script>
+
+</body>
+</html>
