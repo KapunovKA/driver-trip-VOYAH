@@ -276,11 +276,47 @@
         .btn-group .btn-row button:last-child:hover { background:var(--btn-light-hover); }
 
         /* ===== Таблица ===== */
-        .table-wrapper { overflow-x:auto; -webkit-overflow-scrolling:touch; position:relative; z-index:1; }
-        table { width:100%; border-collapse:collapse; font-size:0.8rem; min-width:700px; position:relative; z-index:1; }
-        th, td { padding:8px 6px; text-align:left; border-bottom:1px solid var(--table-border); white-space:nowrap; background:var(--bg-dashboard); position:relative; z-index:1; }
-        th { background:var(--table-header-bg); font-weight:600; font-size:0.75rem; position:-webkit-sticky; position:sticky; top:0; z-index:2; color:var(--text-secondary); }
-        td { font-size:0.8rem; color:var(--text-primary); }
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 400px; /* вертикальный скролл */
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+            z-index: 1;
+            border: 1px solid var(--table-border);
+            border-radius: 8px;
+        }
+        table {
+            width:100%;
+            border-collapse:collapse;
+            font-size:0.8rem;
+            min-width:700px;
+            position:relative;
+            z-index:1;
+        }
+        th, td {
+            padding:8px 6px;
+            text-align:left;
+            border-bottom:1px solid var(--table-border);
+            white-space:nowrap;
+            background:var(--bg-dashboard);
+            position:relative;
+            z-index:1;
+        }
+        th {
+            background:var(--table-header-bg);
+            font-weight:600;
+            font-size:0.75rem;
+            position:-webkit-sticky;
+            position:sticky;
+            top:0;
+            z-index:2;
+            color:var(--text-secondary);
+        }
+        td {
+            font-size:0.8rem;
+            color:var(--text-primary);
+        }
         .delete-btn {
             background:var(--btn-danger); color:#fff; padding:4px 10px; font-size:0.7rem; border:none; border-radius:4px;
             cursor:pointer; width:auto; min-height:30px;
@@ -374,6 +410,7 @@
             .global-tooltip { min-width:160px; max-width:220px; font-size:0.7rem; padding:8px 12px; }
             .chart-container-modal { height:250px; }
             .chart-controls { gap:8px 12px; font-size:0.8rem; }
+            .table-wrapper { max-height: 300px; }
         }
         @media (max-width:480px) {
             .top-bar-left .action-btn, .top-bar-left .settings-btn { padding:4px 10px; font-size:0.7rem; }
@@ -385,6 +422,7 @@
             .stat-widget .stat-row { font-size:0.65rem; }
             .global-tooltip { min-width:140px; max-width:200px; font-size:0.65rem; padding:6px 10px; }
             .chart-container-modal { height:220px; }
+            .table-wrapper { max-height: 250px; }
         }
         @supports (-webkit-touch-callout: none) {
             .dashboard { padding:28px 36px 32px; }
@@ -428,21 +466,24 @@
     <div class="widget-row" id="statWidgets">
         <div class="stat-widget" id="statDay">
             <div class="stat-header">📅 За день</div>
-            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="dayDist">0 км</span></div>
-            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="dayCharge">0 %</span></div>
-            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="dayFuel">0 %</span></div>
+            <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="dayTotalDist">0 км</span></div>
+            <div class="stat-row"><span>В среднем</span><span class="stat-value" id="dayAvgDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="dayAvgCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо (ср.)</span><span class="stat-value" id="dayAvgFuel">0 %</span></div>
         </div>
         <div class="stat-widget" id="statWeek">
-            <div class="stat-header">📅 За неделю</div>
-            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="weekDist">0 км</span></div>
-            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="weekCharge">0 %</span></div>
-            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="weekFuel">0 %</span></div>
+            <div class="stat-header">📅 За неделю (последние 7 дней)</div>
+            <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="weekTotalDist">0 км</span></div>
+            <div class="stat-row"><span>В среднем</span><span class="stat-value" id="weekAvgDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="weekAvgCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо (ср.)</span><span class="stat-value" id="weekAvgFuel">0 %</span></div>
         </div>
         <div class="stat-widget" id="statMonth">
-            <div class="stat-header">📅 За месяц</div>
-            <div class="stat-row"><span>Пробег</span><span class="stat-value" id="monthDist">0 км</span></div>
-            <div class="stat-row"><span>Заряд</span><span class="stat-value" id="monthCharge">0 %</span></div>
-            <div class="stat-row"><span>Топливо</span><span class="stat-value" id="monthFuel">0 %</span></div>
+            <div class="stat-header">📅 За месяц (последние 30 дней)</div>
+            <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="monthTotalDist">0 км</span></div>
+            <div class="stat-row"><span>В среднем</span><span class="stat-value" id="monthAvgDist">0 км</span></div>
+            <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="monthAvgCharge">0 %</span></div>
+            <div class="stat-row"><span>Топливо (ср.)</span><span class="stat-value" id="monthAvgFuel">0 %</span></div>
         </div>
         <div class="right-widget">
             <div class="clock-widget">
@@ -481,19 +522,19 @@
             <div class="form-grid" id="formGrid">
                 <div class="form-group">
                     <label for="tripDate">📅 Дата поездки</label>
-                    <input type="text" id="tripDate" placeholder="2025-03-15">
+                    <input type="text" id="tripDate" placeholder="ДД.ММ.ГГГГ или 01092026">
                 </div>
                 <div class="form-group">
                     <label for="startTime">📍 Старт (время)</label>
-                    <input type="text" id="startTime" placeholder="07:37">
+                    <input type="text" id="startTime" placeholder="07:37 или 0737">
                 </div>
                 <div class="form-group">
                     <label for="endTime">🏁 Финиш (время)</label>
-                    <input type="text" id="endTime" placeholder="15:45">
+                    <input type="text" id="endTime" placeholder="15:45 или 1545">
                 </div>
                 <div class="form-group">
                     <label for="duration">⏱ Продолжительность</label>
-                    <input type="text" id="duration" placeholder="01:15">
+                    <input type="text" id="duration" placeholder="01:15" readonly>
                 </div>
                 <div class="form-group">
                     <label for="distance">📏 Расстояние, км</label>
@@ -806,7 +847,11 @@
             clearInactivityTimer();
             document.getElementById('recordsBody').innerHTML =
                 '<tr><td colspan="8" style="text-align:center; color:var(--text-light); padding:15px;">Нет сохранённых записей</td></tr>';
-            ['dayDist','dayCharge','dayFuel','weekDist','weekCharge','weekFuel','monthDist','monthCharge','monthFuel'].forEach(id => {
+            // Обнуляем виджеты
+            ['dayTotalDist','dayAvgDist','dayAvgCharge','dayAvgFuel',
+             'weekTotalDist','weekAvgDist','weekAvgCharge','weekAvgFuel',
+             'monthTotalDist','monthAvgDist','monthAvgCharge','monthAvgFuel'
+            ].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = '0 км';
             });
@@ -929,7 +974,71 @@
     }
 
     // ==========================================
-    // 5. РАБОТА С ЗАПИСЯМИ (localStorage)
+    // 5. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ВРЕМЕНИ И ДАТЫ
+    // ==========================================
+
+    function normalizeTime(input) {
+        if (!input) return input;
+        const digits = input.replace(/\D/g, '');
+        if (digits.length === 4) {
+            const h = parseInt(digits.substring(0,2), 10);
+            const m = parseInt(digits.substring(2,4), 10);
+            if (h >= 0 && h < 24 && m >= 0 && m < 60) {
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            }
+        }
+        if (/^\d{1,2}:\d{2}$/.test(input)) {
+            const parts = input.split(':');
+            const h = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            if (h >= 0 && h < 24 && m >= 0 && m < 60) {
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            }
+        }
+        return input;
+    }
+
+    function calculateDuration() {
+        const startField = document.getElementById('startTime');
+        const endField = document.getElementById('endTime');
+        const durationField = document.getElementById('duration');
+        const startVal = normalizeTime(startField.value);
+        const endVal = normalizeTime(endField.value);
+        const startParts = startVal.match(/^(\d{2}):(\d{2})$/);
+        const endParts = endVal.match(/^(\d{2}):(\d{2})$/);
+        if (startParts && endParts) {
+            const startMin = parseInt(startParts[1]) * 60 + parseInt(startParts[2]);
+            const endMin = parseInt(endParts[1]) * 60 + parseInt(endParts[2]);
+            let diff = endMin - startMin;
+            if (diff < 0) diff += 1440;
+            const h = Math.floor(diff / 60);
+            const m = diff % 60;
+            durationField.value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+    }
+
+    function normalizeDate(input) {
+        if (!input) return input;
+        const digits = input.replace(/\D/g, '');
+        if (digits.length === 8) {
+            const day = parseInt(digits.substring(0,2), 10);
+            const month = parseInt(digits.substring(2,4), 10);
+            const year = parseInt(digits.substring(4,8), 10);
+            if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= 2100) {
+                return `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
+            }
+            const year2 = parseInt(digits.substring(0,4), 10);
+            const month2 = parseInt(digits.substring(4,6), 10);
+            const day2 = parseInt(digits.substring(6,8), 10);
+            if (year2 >= 1900 && year2 <= 2100 && month2 >= 1 && month2 <= 12 && day2 >= 1 && day2 <= 31) {
+                return `${String(day2).padStart(2, '0')}.${String(month2).padStart(2, '0')}.${year2}`;
+            }
+        }
+        return input;
+    }
+
+    // ==========================================
+    // 6. РАБОТА С ЗАПИСЯМИ (localStorage)
     // ==========================================
     const STORAGE_KEY = 'trip_records_analysis';
 
@@ -947,6 +1056,22 @@
     }
 
     function addRecord(record) {
+        if (record.tripDate) record.tripDate = normalizeDate(record.tripDate);
+        if (record.startTime) record.startTime = normalizeTime(record.startTime);
+        if (record.endTime) record.endTime = normalizeTime(record.endTime);
+        if (!record.duration && record.startTime && record.endTime) {
+            const startParts = record.startTime.match(/^(\d{2}):(\d{2})$/);
+            const endParts = record.endTime.match(/^(\d{2}):(\d{2})$/);
+            if (startParts && endParts) {
+                const startMin = parseInt(startParts[1]) * 60 + parseInt(startParts[2]);
+                const endMin = parseInt(endParts[1]) * 60 + parseInt(endParts[2]);
+                let diff = endMin - startMin;
+                if (diff < 0) diff += 1440;
+                const h = Math.floor(diff / 60);
+                const m = diff % 60;
+                record.duration = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            }
+        }
         const records = getRecords();
         record.id = Date.now();
         record.timestamp = Date.now();
@@ -977,7 +1102,7 @@
     }
 
     // ==========================================
-    // 6. РАСПОЗНАВАНИЕ И ПАРСИНГ
+    // 7. РАСПОЗНАВАНИЕ И ПАРСИНГ
     // ==========================================
     function parseAndFillFields(text) {
         const fields = {
@@ -1017,85 +1142,111 @@
         }
 
         if (startLine) {
-            const datePattern = /\b(\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{4}|\d{1,2}\.\d{1,2}\.\d{4})\b/;
-            const dateMatch = startLine.match(datePattern);
-            if (dateMatch) found.tripDate = dateMatch[0];
+            let dateMatch = startLine.match(/\b(\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{4}|\d{1,2}\.\d{1,2}\.\d{4})\b/);
+            if (!dateMatch) {
+                const digits = startLine.match(/\b(\d{8})\b/);
+                if (digits) {
+                    const raw = digits[1];
+                    const normalized = normalizeDate(raw);
+                    if (normalized && normalized !== raw) found.tripDate = normalized;
+                }
+            } else {
+                found.tripDate = dateMatch[0];
+                found.tripDate = normalizeDate(found.tripDate);
+            }
+        }
 
-            const timeAfterCommaPattern = /,\s*(\d{1,2}[:.]\d{2})/;
-            const timeAfterCommaMatch = startLine.match(timeAfterCommaPattern);
-            if (timeAfterCommaMatch) {
-                found.startTime = timeAfterCommaMatch[1].replace('.', ':');
+        if (startLine) {
+            const timeAfterComma = startLine.match(/,\s*(\d{1,2}[:.]\d{2})/);
+            if (timeAfterComma) {
+                found.startTime = normalizeTime(timeAfterComma[1].replace('.', ':'));
             } else {
                 const timePattern = /\b(\d{1,2}[:.]\d{2})\b/;
                 const timeMatch = startLine.match(timePattern);
                 if (timeMatch) {
-                    found.startTime = timeMatch[0].replace('.', ':');
+                    found.startTime = normalizeTime(timeMatch[0].replace('.', ':'));
+                } else {
+                    const digits = startLine.match(/\b(\d{4})\b/);
+                    if (digits) {
+                        const normalized = normalizeTime(digits[1]);
+                        if (normalized && normalized !== digits[1]) found.startTime = normalized;
+                    }
                 }
             }
         }
 
         if (endLine) {
-            const timeAfterCommaPattern = /,\s*(\d{1,2}[:.]\d{2})/;
-            const timeAfterCommaMatch = endLine.match(timeAfterCommaPattern);
-            if (timeAfterCommaMatch) {
-                found.endTime = timeAfterCommaMatch[1].replace('.', ':');
+            const timeAfterComma = endLine.match(/,\s*(\d{1,2}[:.]\d{2})/);
+            if (timeAfterComma) {
+                found.endTime = normalizeTime(timeAfterComma[1].replace('.', ':'));
             } else {
                 const timePattern = /\b(\d{1,2}[:.]\d{2})\b/;
                 const timeMatch = endLine.match(timePattern);
                 if (timeMatch) {
-                    found.endTime = timeMatch[0].replace('.', ':');
+                    found.endTime = normalizeTime(timeMatch[0].replace('.', ':'));
+                } else {
+                    const digits = endLine.match(/\b(\d{4})\b/);
+                    if (digits) {
+                        const normalized = normalizeTime(digits[1]);
+                        if (normalized && normalized !== digits[1]) found.endTime = normalized;
+                    }
                 }
             }
         }
 
         if (durationLine) {
-            const durationPattern = /\b(\d{1,2}[:.]\d{2}|\d+\s*(?:мин|минут|ч|час))\b/;
-            const durationMatch = durationLine.match(durationPattern);
-            if (durationMatch) {
-                found.duration = durationMatch[0].replace('.', ':');
+            const durMatch = durationLine.match(/\b(\d{1,2}[:.]\d{2}|\d+\s*(?:мин|минут|ч|час))\b/);
+            if (durMatch) {
+                found.duration = durMatch[0].replace('.', ':');
             }
         }
 
         if (distanceLine) {
-            const distancePattern = /(\d+[.,]?\d*)\s*(?:км|km|километр)/i;
-            const distanceMatch = distanceLine.match(distancePattern);
-            if (distanceMatch) {
-                found.distance = distanceMatch[1].replace(',', '.');
+            const distMatch = distanceLine.match(/(\d+[.,]?\d*)\s*(?:км|km|километр)/i);
+            if (distMatch) {
+                found.distance = distMatch[1].replace(',', '.');
             }
         }
 
         if (chargeStartLine) {
-            const percentPattern = /(\d+)\s*%/;
-            const percentMatch = chargeStartLine.match(percentPattern);
-            if (percentMatch) found.chargeStart = percentMatch[1];
+            const p = chargeStartLine.match(/(\d+)\s*%/);
+            if (p) found.chargeStart = p[1];
         }
-
         if (chargeEndLine) {
-            const percentPattern = /(\d+)\s*%/;
-            const percentMatch = chargeEndLine.match(percentPattern);
-            if (percentMatch) found.chargeEnd = percentMatch[1];
+            const p = chargeEndLine.match(/(\d+)\s*%/);
+            if (p) found.chargeEnd = p[1];
         }
 
         if (fuelStartLine) {
-            const percentPattern = /(\d+)\s*%/;
-            const percentMatch = fuelStartLine.match(percentPattern);
-            if (percentMatch) found.fuelStart = percentMatch[1];
+            const p = fuelStartLine.match(/(\d+)\s*%/);
+            if (p) found.fuelStart = p[1];
         }
-
         if (fuelEndLine) {
-            const percentPattern = /(\d+)\s*%/;
-            const percentMatch = fuelEndLine.match(percentPattern);
-            if (percentMatch) found.fuelEnd = percentMatch[1];
+            const p = fuelEndLine.match(/(\d+)\s*%/);
+            if (p) found.fuelEnd = p[1];
         }
 
         if (found.chargeStart && found.chargeEnd) {
             const diff = parseFloat(found.chargeStart) - parseFloat(found.chargeEnd);
             if (!isNaN(diff) && diff >= 0) found.chargeUsed = diff.toString();
         }
-
         if (found.fuelStart && found.fuelEnd) {
             const diff = parseFloat(found.fuelStart) - parseFloat(found.fuelEnd);
             if (!isNaN(diff) && diff >= 0) found.fuelUsed = diff.toString();
+        }
+
+        if (!found.duration && found.startTime && found.endTime) {
+            const sParts = found.startTime.match(/^(\d{2}):(\d{2})$/);
+            const eParts = found.endTime.match(/^(\d{2}):(\d{2})$/);
+            if (sParts && eParts) {
+                const sMin = parseInt(sParts[1])*60 + parseInt(sParts[2]);
+                const eMin = parseInt(eParts[1])*60 + parseInt(eParts[2]);
+                let diff = eMin - sMin;
+                if (diff < 0) diff += 1440;
+                const h = Math.floor(diff / 60);
+                const m = diff % 60;
+                found.duration = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            }
         }
 
         let filledCount = 0;
@@ -1107,44 +1258,105 @@
             }
         }
 
+        recalculateCharge();
+        recalculateFuel();
+        calculateDuration();
+
         return { found, filledCount };
     }
 
     // ==========================================
-    // 7. СТАТИСТИКА (исправлена логика фильтрации по календарным дням)
+    // 8. АВТОМАТИЧЕСКИЙ ПЕРЕСЧЁТ РАСХОДА И ПРОДОЛЖИТЕЛЬНОСТИ
+    // ==========================================
+    function recalculateCharge() {
+        const start = parseFloat(document.getElementById('chargeStart').value);
+        const end = parseFloat(document.getElementById('chargeEnd').value);
+        const usedField = document.getElementById('chargeUsed');
+        if (!isNaN(start) && !isNaN(end)) {
+            const used = start - end;
+            if (used >= 0) usedField.value = used.toFixed(1);
+            else usedField.value = '';
+        } else usedField.value = '';
+    }
+
+    function recalculateFuel() {
+        const start = parseFloat(document.getElementById('fuelStart').value);
+        const end = parseFloat(document.getElementById('fuelEnd').value);
+        const usedField = document.getElementById('fuelUsed');
+        if (!isNaN(start) && !isNaN(end)) {
+            const used = start - end;
+            if (used >= 0) usedField.value = used.toFixed(1);
+            else usedField.value = '';
+        } else usedField.value = '';
+    }
+
+    document.getElementById('chargeStart').addEventListener('input', recalculateCharge);
+    document.getElementById('chargeEnd').addEventListener('input', recalculateCharge);
+    document.getElementById('fuelStart').addEventListener('input', recalculateFuel);
+    document.getElementById('fuelEnd').addEventListener('input', recalculateFuel);
+
+    const startTimeInput = document.getElementById('startTime');
+    const endTimeInput = document.getElementById('endTime');
+
+    function onTimeBlur(e) {
+        e.target.value = normalizeTime(e.target.value);
+        calculateDuration();
+    }
+    startTimeInput.addEventListener('blur', onTimeBlur);
+    endTimeInput.addEventListener('blur', onTimeBlur);
+
+    // ==========================================
+    // 9. СТАТИСТИКА (с группировкой по дням)
     // ==========================================
     function updateStats() {
         if (!state.authenticated) {
-            ['dayDist','dayCharge','dayFuel','weekDist','weekCharge','weekFuel','monthDist','monthCharge','monthFuel'].forEach(id => {
+            const ids = ['dayTotalDist','dayAvgDist','dayAvgCharge','dayAvgFuel',
+                         'weekTotalDist','weekAvgDist','weekAvgCharge','weekAvgFuel',
+                         'monthTotalDist','monthAvgDist','monthAvgCharge','monthAvgFuel'];
+            ids.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.textContent = '0 км';
+                if (el) el.textContent = '0';
             });
             return;
         }
         const records = getRecords();
         if (records.length === 0) {
-            ['dayDist','dayCharge','dayFuel','weekDist','weekCharge','weekFuel','monthDist','monthCharge','monthFuel'].forEach(id => {
+            const ids = ['dayTotalDist','dayAvgDist','dayAvgCharge','dayAvgFuel',
+                         'weekTotalDist','weekAvgDist','weekAvgCharge','weekAvgFuel',
+                         'monthTotalDist','monthAvgDist','monthAvgCharge','monthAvgFuel'];
+            ids.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.textContent = '0 км';
+                if (el) el.textContent = '0';
             });
             return;
         }
 
-        // Функция фильтрации по количеству календарных дней (включая сегодня)
+        // Группировка по датам
+        function groupByDate(records) {
+            const map = new Map();
+            records.forEach(r => {
+                const date = r.tripDate;
+                if (!date) return;
+                if (!map.has(date)) map.set(date, { date, distance: 0, charge: 0, fuel: 0 });
+                const entry = map.get(date);
+                entry.distance += parseFloat(r.distance) || 0;
+                entry.charge += parseFloat(r.chargeUsed) || 0;
+                entry.fuel += parseFloat(r.fuelUsed) || 0;
+            });
+            return Array.from(map.values());
+        }
+
+        // Фильтр по последним N дням
         function filterByDays(days) {
             const now = new Date();
             const cutoff = new Date(now);
             cutoff.setDate(cutoff.getDate() - days);
-            // Обнуляем время для корректного сравнения
             cutoff.setHours(0,0,0,0);
             return records.filter(r => {
                 if (!r.tripDate) return false;
                 const parts = r.tripDate.split('.');
                 if (parts.length === 3) {
-                    const day = parseInt(parts[0], 10);
-                    const month = parseInt(parts[1], 10) - 1;
-                    const year = parseInt(parts[2], 10);
-                    const d = new Date(year, month, day);
+                    const d = new Date(parts[2], parts[1]-1, parts[0]);
                     d.setHours(0,0,0,0);
                     return d >= cutoff;
                 }
@@ -1152,51 +1364,44 @@
             });
         }
 
-        // Все записи (за день — по сути все, но мы оставим как среднее по всем)
-        const all = records;
-        const totalDist = all.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
-        const totalCharge = all.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
-        const totalFuel = all.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
-        const cnt = all.length;
-        document.getElementById('dayDist').textContent = (cnt ? totalDist / cnt : 0).toFixed(1) + ' км';
-        document.getElementById('dayCharge').textContent = (cnt ? totalCharge / cnt : 0).toFixed(1) + ' %';
-        document.getElementById('dayFuel').textContent = (cnt ? totalFuel / cnt : 0).toFixed(1) + ' %';
+        // Все дни
+        const allDays = groupByDate(records);
+        const totalDistAll = allDays.reduce((s, d) => s + d.distance, 0);
+        const totalChargeAll = allDays.reduce((s, d) => s + d.charge, 0);
+        const totalFuelAll = allDays.reduce((s, d) => s + d.fuel, 0);
+        const countAll = allDays.length;
+        document.getElementById('dayTotalDist').textContent = totalDistAll.toFixed(1) + ' км';
+        document.getElementById('dayAvgDist').textContent = (countAll ? totalDistAll / countAll : 0).toFixed(1) + ' км';
+        document.getElementById('dayAvgCharge').textContent = (countAll ? totalChargeAll / countAll : 0).toFixed(1) + ' %';
+        document.getElementById('dayAvgFuel').textContent = (countAll ? totalFuelAll / countAll : 0).toFixed(1) + ' %';
 
-        // За неделю (7 календарных дней)
+        // Неделя
         const weekRecs = filterByDays(7);
-        if (weekRecs.length) {
-            const wDist = weekRecs.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
-            const wCharge = weekRecs.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
-            const wFuel = weekRecs.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
-            const wc = weekRecs.length;
-            document.getElementById('weekDist').textContent = (wc ? wDist / wc : 0).toFixed(1) + ' км';
-            document.getElementById('weekCharge').textContent = (wc ? wCharge / wc : 0).toFixed(1) + ' %';
-            document.getElementById('weekFuel').textContent = (wc ? wFuel / wc : 0).toFixed(1) + ' %';
-        } else {
-            document.getElementById('weekDist').textContent = '0 км';
-            document.getElementById('weekCharge').textContent = '0 %';
-            document.getElementById('weekFuel').textContent = '0 %';
-        }
+        const weekDays = groupByDate(weekRecs);
+        const totalDistWeek = weekDays.reduce((s, d) => s + d.distance, 0);
+        const totalChargeWeek = weekDays.reduce((s, d) => s + d.charge, 0);
+        const totalFuelWeek = weekDays.reduce((s, d) => s + d.fuel, 0);
+        const countWeek = weekDays.length;
+        document.getElementById('weekTotalDist').textContent = totalDistWeek.toFixed(1) + ' км';
+        document.getElementById('weekAvgDist').textContent = (countWeek ? totalDistWeek / countWeek : 0).toFixed(1) + ' км';
+        document.getElementById('weekAvgCharge').textContent = (countWeek ? totalChargeWeek / countWeek : 0).toFixed(1) + ' %';
+        document.getElementById('weekAvgFuel').textContent = (countWeek ? totalFuelWeek / countWeek : 0).toFixed(1) + ' %';
 
-        // За месяц (30 календарных дней)
+        // Месяц
         const monthRecs = filterByDays(30);
-        if (monthRecs.length) {
-            const mDist = monthRecs.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
-            const mCharge = monthRecs.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
-            const mFuel = monthRecs.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
-            const mc = monthRecs.length;
-            document.getElementById('monthDist').textContent = (mc ? mDist / mc : 0).toFixed(1) + ' км';
-            document.getElementById('monthCharge').textContent = (mc ? mCharge / mc : 0).toFixed(1) + ' %';
-            document.getElementById('monthFuel').textContent = (mc ? mFuel / mc : 0).toFixed(1) + ' %';
-        } else {
-            document.getElementById('monthDist').textContent = '0 км';
-            document.getElementById('monthCharge').textContent = '0 %';
-            document.getElementById('monthFuel').textContent = '0 %';
-        }
+        const monthDays = groupByDate(monthRecs);
+        const totalDistMonth = monthDays.reduce((s, d) => s + d.distance, 0);
+        const totalChargeMonth = monthDays.reduce((s, d) => s + d.charge, 0);
+        const totalFuelMonth = monthDays.reduce((s, d) => s + d.fuel, 0);
+        const countMonth = monthDays.length;
+        document.getElementById('monthTotalDist').textContent = totalDistMonth.toFixed(1) + ' км';
+        document.getElementById('monthAvgDist').textContent = (countMonth ? totalDistMonth / countMonth : 0).toFixed(1) + ' км';
+        document.getElementById('monthAvgCharge').textContent = (countMonth ? totalChargeMonth / countMonth : 0).toFixed(1) + ' %';
+        document.getElementById('monthAvgFuel').textContent = (countMonth ? totalFuelMonth / countMonth : 0).toFixed(1) + ' %';
     }
 
     // ==========================================
-    // 8. ОТРИСОВКА ТАБЛИЦЫ
+    // 10. ОТРИСОВКА ТАБЛИЦЫ
     // ==========================================
     function renderTable() {
         if (!state.authenticated) return;
@@ -1290,7 +1495,7 @@
     }
 
     // ==========================================
-    // 9. TOAST
+    // 11. TOAST
     // ==========================================
     function showToast(message, type = 'success') {
         const toast = document.getElementById('toast');
@@ -1301,7 +1506,7 @@
     }
 
     // ==========================================
-    // 10. ЯНДЕКС ДИСК (облако)
+    // 12. ЯНДЕКС ДИСК (облако) – улучшена обработка ошибок для iPhone
     // ==========================================
     const YANDEX_BACKUP_PATH = 'app:/trip_data.json';
 
@@ -1409,7 +1614,12 @@
             return data;
         } catch (error) {
             console.error('Ошибка загрузки:', error);
-            showToast('❌ Загрузка не выполнена: ' + error.message, 'error');
+            let message = error.message || 'Неизвестная ошибка';
+            // Дополнительная обработка для iPhone (например, сетевые ошибки)
+            if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+                message = 'Ошибка сети. Проверьте подключение к интернету.';
+            }
+            showToast('❌ Загрузка не выполнена: ' + message, 'error');
             if (!getYandexToken()) showTokenModal();
             return null;
         }
@@ -1434,7 +1644,7 @@
     }
 
     // ==========================================
-    // 11. ДИАГРАММА
+    // 13. ДИАГРАММА
     // ==========================================
     let chartInstance = null;
 
@@ -1658,7 +1868,7 @@
     }
 
     // ==========================================
-    // 12. ОБРАБОТЧИКИ
+    // 14. ОБРАБОТЧИКИ
     // ==========================================
     document.getElementById('loginBtn').addEventListener('click', function() {
         if (state.authenticated) {
@@ -1901,6 +2111,23 @@
             return;
         }
 
+        if (record.tripDate) record.tripDate = normalizeDate(record.tripDate);
+        if (record.startTime) record.startTime = normalizeTime(record.startTime);
+        if (record.endTime) record.endTime = normalizeTime(record.endTime);
+        if (!record.duration && record.startTime && record.endTime) {
+            const sParts = record.startTime.match(/^(\d{2}):(\d{2})$/);
+            const eParts = record.endTime.match(/^(\d{2}):(\d{2})$/);
+            if (sParts && eParts) {
+                const sMin = parseInt(sParts[1])*60 + parseInt(sParts[2]);
+                const eMin = parseInt(eParts[1])*60 + parseInt(eParts[2]);
+                let diff = eMin - sMin;
+                if (diff < 0) diff += 1440;
+                const h = Math.floor(diff / 60);
+                const m = diff % 60;
+                record.duration = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            }
+        }
+
         addRecord(record);
         for (const input of Object.values(fields)) {
             input.value = '';
@@ -1920,12 +2147,15 @@
                 el.classList.remove('found');
             }
         });
+        recalculateCharge();
+        recalculateFuel();
+        calculateDuration();
     });
 
     document.getElementById('clearAllBtn').addEventListener('click', clearAllRecords);
 
     // ==========================================
-    // 13. ИНИЦИАЛИЗАЦИЯ
+    // 15. ИНИЦИАЛИЗАЦИЯ
     // ==========================================
     function init() {
         loadSettings();
