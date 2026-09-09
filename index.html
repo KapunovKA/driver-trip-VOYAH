@@ -176,7 +176,14 @@
             transition:all var(--transition); cursor:default; flex:1 1 180px; min-width:160px; display:flex; flex-direction:column; gap:4px;
         }
         .stat-widget:hover { background:var(--bg-widget-hover); border-color:var(--border-widget); box-shadow:var(--shadow-hover); transform:translateY(-2px) scale(1.01); }
-        .stat-widget .stat-header { font-weight:600; font-size:0.85rem; color:var(--text-secondary); margin-bottom:2px; }
+        .stat-widget .stat-header {
+            font-weight:600; font-size:0.85rem; color:var(--text-secondary); margin-bottom:2px;
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .stat-widget .stat-header .period-picker {
+            cursor:pointer; font-size:0.9rem; padding:0 4px; border-radius:4px; transition:background var(--transition);
+        }
+        .stat-widget .stat-header .period-picker:hover { background:var(--bg-widget-hover); }
         .stat-widget .stat-row { display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); padding:1px 0; }
         .stat-widget .stat-row .stat-value { font-weight:600; color:var(--text-primary); }
 
@@ -218,7 +225,7 @@
         }
         .modal-overlay.active { display:flex; }
         .modal-content {
-            background:var(--modal-bg); border-radius:32px; padding:28px 32px 24px; max-width:800px; width:92%;
+            background:var(--modal-bg); border-radius:32px; padding:28px 32px 24px; max-width:850px; width:92%;
             box-shadow:var(--modal-shadow); animation:slideUp 0.3s ease; position:relative; color:var(--text-primary);
             max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
         }
@@ -373,6 +380,75 @@
         .chart-controls label { display:flex; align-items:center; gap:6px; cursor:pointer; }
         .chart-controls input[type="checkbox"] { width:18px; height:18px; accent-color:var(--btn-primary); cursor:pointer; }
         .chart-controls input[type="radio"] { accent-color:var(--btn-primary); cursor:pointer; }
+        /* Даты и период */
+        .period-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .period-selector button {
+            width: auto;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            min-height: 34px;
+            background: var(--btn-light);
+            border: 1px solid var(--border-widget);
+            border-radius: 20px;
+            color: var(--btn-light-text);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .period-selector button:hover { background: var(--btn-light-hover); }
+        .period-selector button.active { background: var(--btn-primary); color: #fff; border-color: var(--btn-primary); }
+        .period-selector .date-range {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .period-selector .date-range input[type="date"] {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-widget);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+        }
+        .period-selector .date-range span { color: var(--text-muted); }
+        .stats-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 24px;
+            justify-content: center;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: var(--bg-widget);
+            border-radius: 12px;
+            border: 1px solid var(--border-widget);
+        }
+        .stats-summary .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .stats-summary .stat-item .stat-number {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        /* ===== Модальное окно выбора периода для виджетов ===== */
+        .period-picker-modal .modal-content {
+            max-width: 400px;
+        }
+        .period-picker-modal .settings-group input[type="date"] {
+            border-radius: 6px;
+        }
 
         /* ===== Toast ===== */
         .toast {
@@ -411,6 +487,11 @@
             .chart-container-modal { height:250px; }
             .chart-controls { gap:8px 12px; font-size:0.8rem; }
             .table-wrapper { max-height: 300px; }
+            .period-selector { gap:6px; }
+            .period-selector button { font-size:0.7rem; padding:4px 10px; min-height:28px; }
+            .stats-summary { gap:12px; padding:6px 10px; }
+            .stats-summary .stat-item { font-size:0.7rem; }
+            .stats-summary .stat-item .stat-number { font-size:0.9rem; }
         }
         @media (max-width:480px) {
             .top-bar-left .action-btn, .top-bar-left .settings-btn { padding:4px 10px; font-size:0.7rem; }
@@ -423,6 +504,7 @@
             .global-tooltip { min-width:140px; max-width:200px; font-size:0.65rem; padding:6px 10px; }
             .chart-container-modal { height:220px; }
             .table-wrapper { max-height: 250px; }
+            .period-selector .date-range input[type="date"] { font-size:0.7rem; padding:2px 4px; width:120px; }
         }
         @supports (-webkit-touch-callout: none) {
             .dashboard { padding:28px 36px 32px; }
@@ -462,24 +544,33 @@
         <span id="authStatus" class="auth-status unauthorized">🔒 Требуется вход</span>
     </div>
 
-    <!-- Виджеты статистики -->
+    <!-- Виджеты статистики с выбором периода -->
     <div class="widget-row" id="statWidgets">
         <div class="stat-widget" id="statDay">
-            <div class="stat-header">📅 За сегодня</div>
+            <div class="stat-header">
+                📅 За сегодня
+                <span class="period-picker" data-target="day" title="Выбрать период">📅</span>
+            </div>
             <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="dayTotalDist">0 км</span></div>
             <div class="stat-row"><span>В среднем</span><span class="stat-value" id="dayAvgDist">0 км</span></div>
             <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="dayAvgCharge">0 %</span></div>
             <div class="stat-row"><span>Топливо (ср.)</span><span class="stat-value" id="dayAvgFuel">0 %</span></div>
         </div>
         <div class="stat-widget" id="statWeek">
-            <div class="stat-header">📅 За неделю (последние 7 дней)</div>
+            <div class="stat-header">
+                📅 За неделю
+                <span class="period-picker" data-target="week" title="Выбрать период">📅</span>
+            </div>
             <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="weekTotalDist">0 км</span></div>
             <div class="stat-row"><span>В среднем</span><span class="stat-value" id="weekAvgDist">0 км</span></div>
             <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="weekAvgCharge">0 %</span></div>
             <div class="stat-row"><span>Топливо (ср.)</span><span class="stat-value" id="weekAvgFuel">0 %</span></div>
         </div>
         <div class="stat-widget" id="statMonth">
-            <div class="stat-header">📅 За месяц (последние 30 дней)</div>
+            <div class="stat-header">
+                📅 За месяц
+                <span class="period-picker" data-target="month" title="Выбрать период">📅</span>
+            </div>
             <div class="stat-row"><span>Суммарно</span><span class="stat-value" id="monthTotalDist">0 км</span></div>
             <div class="stat-row"><span>В среднем</span><span class="stat-value" id="monthAvgDist">0 км</span></div>
             <div class="stat-row"><span>Заряд (ср.)</span><span class="stat-value" id="monthAvgCharge">0 %</span></div>
@@ -673,10 +764,29 @@
 
 <!-- Диаграмма -->
 <div class="modal-overlay" id="chartModal">
-    <div class="modal-content" style="max-width:800px;">
+    <div class="modal-content" style="max-width:850px;">
         <div class="modal-header">
-            <h3>📊 Ежесуточная динамика</h3>
+            <h3>📊 Анализ данных за период</h3>
             <button class="modal-close" id="chartModalClose">✕</button>
+        </div>
+        <div class="period-selector" id="periodSelector">
+            <button data-period="today" class="active">Сегодня</button>
+            <button data-period="week">Неделя</button>
+            <button data-period="month">Месяц</button>
+            <button data-period="custom">Произвольный</button>
+            <div class="date-range" id="dateRange" style="display:none;">
+                <span>с</span>
+                <input type="date" id="startDate">
+                <span>по</span>
+                <input type="date" id="endDate">
+                <button id="applyRangeBtn" style="width:auto; padding:4px 12px; min-height:30px; font-size:0.8rem;">Применить</button>
+            </div>
+        </div>
+        <div class="stats-summary" id="statsSummary">
+            <div class="stat-item"><span>Пробег</span><span class="stat-number" id="sumDist">0 км</span></div>
+            <div class="stat-item"><span>Заряд</span><span class="stat-number" id="sumCharge">0 %</span></div>
+            <div class="stat-item"><span>Топливо</span><span class="stat-number" id="sumFuel">0 %</span></div>
+            <div class="stat-item"><span>Кол-во записей</span><span class="stat-number" id="sumCount">0</span></div>
         </div>
         <div class="chart-controls">
             <label><input type="checkbox" id="chkDistance" checked> Пробег, км</label>
@@ -699,6 +809,26 @@
         </div>
         <div style="margin-top:10px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
             По каждой дате построены значения из таблицы
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно выбора периода для виджетов -->
+<div class="modal-overlay period-picker-modal" id="periodPickerModal">
+    <div class="modal-content" style="max-width:400px;">
+        <div class="modal-header">
+            <h3>Выбор периода</h3>
+            <button class="modal-close" id="periodPickerClose">✕</button>
+        </div>
+        <div class="settings-group">
+            <label for="periodPickerStart">Начало</label>
+            <input type="date" id="periodPickerStart">
+            <label for="periodPickerEnd" style="margin-top:8px;">Конец</label>
+            <input type="date" id="periodPickerEnd">
+        </div>
+        <button id="periodPickerApply" style="width:100%; margin-top:8px;">Применить</button>
+        <div style="margin-top:8px; text-align:center; font-size:0.75rem; color:var(--text-muted);">
+            Будут показаны данные за выбранный период.
         </div>
     </div>
 </div>
@@ -1306,97 +1436,137 @@
     endTimeInput.addEventListener('blur', onTimeBlur);
 
     // ==========================================
-    // 9. СТАТИСТИКА (исправлен расчёт для "за день")
+    // 9. СТАТИСТИКА С ВОЗМОЖНОСТЬЮ ВЫБОРА ПЕРИОДА ДЛЯ КАЖДОГО ВИДЖЕТА
     // ==========================================
+    // Храним периоды для каждого виджета (в формате {start: Date, end: Date})
+    const widgetPeriods = {
+        day: { start: null, end: null },
+        week: { start: null, end: null },
+        month: { start: null, end: null }
+    };
+
+    // Установка начальных периодов
+    function initWidgetPeriods() {
+        const now = new Date();
+        // День: сегодня
+        const todayStart = new Date(now);
+        todayStart.setHours(0,0,0,0);
+        const todayEnd = new Date(now);
+        todayEnd.setHours(23,59,59,999);
+        widgetPeriods.day.start = todayStart;
+        widgetPeriods.day.end = todayEnd;
+
+        // Неделя: последние 7 дней (включая сегодня)
+        const weekStart = new Date(now);
+        weekStart.setDate(weekStart.getDate() - 6);
+        weekStart.setHours(0,0,0,0);
+        const weekEnd = new Date(now);
+        weekEnd.setHours(23,59,59,999);
+        widgetPeriods.week.start = weekStart;
+        widgetPeriods.week.end = weekEnd;
+
+        // Месяц: последние 30 дней
+        const monthStart = new Date(now);
+        monthStart.setDate(monthStart.getDate() - 29);
+        monthStart.setHours(0,0,0,0);
+        const monthEnd = new Date(now);
+        monthEnd.setHours(23,59,59,999);
+        widgetPeriods.month.start = monthStart;
+        widgetPeriods.month.end = monthEnd;
+    }
+
+    // Функция для фильтрации записей по диапазону дат (использует объекты Date)
+    function filterRecordsByDateRange(records, startDate, endDate) {
+        if (!startDate || !endDate) return records;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        start.setHours(0,0,0,0);
+        end.setHours(23,59,59,999);
+        return records.filter(r => {
+            if (!r.tripDate) return false;
+            const parts = r.tripDate.split('.');
+            if (parts.length === 3) {
+                const d = new Date(parts[2], parts[1]-1, parts[0]);
+                d.setHours(0,0,0,0);
+                return d >= start && d <= end;
+            }
+            return false;
+        });
+    }
+
+    // Обновление статистики для конкретного виджета
+    function updateWidgetStats(widgetKey) {
+        if (!state.authenticated) return;
+        const records = getRecords();
+        const period = widgetPeriods[widgetKey];
+        if (!period || !period.start || !period.end) return;
+
+        const filtered = filterRecordsByDateRange(records, period.start, period.end);
+        const totalDist = filtered.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+        const totalCharge = filtered.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
+        const totalFuel = filtered.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
+        const count = filtered.length;
+
+        // Определяем id элементов
+        const ids = {
+            day: {
+                totalDist: 'dayTotalDist',
+                avgDist: 'dayAvgDist',
+                avgCharge: 'dayAvgCharge',
+                avgFuel: 'dayAvgFuel'
+            },
+            week: {
+                totalDist: 'weekTotalDist',
+                avgDist: 'weekAvgDist',
+                avgCharge: 'weekAvgCharge',
+                avgFuel: 'weekAvgFuel'
+            },
+            month: {
+                totalDist: 'monthTotalDist',
+                avgDist: 'monthAvgDist',
+                avgCharge: 'monthAvgCharge',
+                avgFuel: 'monthAvgFuel'
+            }
+        };
+
+        const idMap = ids[widgetKey];
+        if (!idMap) return;
+
+        const avgDist = count ? totalDist / count : 0;
+        const avgCharge = count ? totalCharge / count : 0;
+        const avgFuel = count ? totalFuel / count : 0;
+
+        document.getElementById(idMap.totalDist).textContent = totalDist.toFixed(1) + ' км';
+        document.getElementById(idMap.avgDist).textContent = avgDist.toFixed(1) + ' км';
+        document.getElementById(idMap.avgCharge).textContent = avgCharge.toFixed(1) + ' %';
+        document.getElementById(idMap.avgFuel).textContent = avgFuel.toFixed(1) + ' %';
+    }
+
+    // Обновление всех виджетов
+    function updateAllWidgetStats() {
+        updateWidgetStats('day');
+        updateWidgetStats('week');
+        updateWidgetStats('month');
+    }
+
+    // Переопределяем updateStats, чтобы использовать новые функции
     function updateStats() {
         if (!state.authenticated) {
-            const ids = ['dayTotalDist','dayAvgDist','dayAvgCharge','dayAvgFuel',
-                         'weekTotalDist','weekAvgDist','weekAvgCharge','weekAvgFuel',
-                         'monthTotalDist','monthAvgDist','monthAvgCharge','monthAvgFuel'];
-            ids.forEach(id => {
+            // Обнуляем виджеты
+            ['dayTotalDist','dayAvgDist','dayAvgCharge','dayAvgFuel',
+             'weekTotalDist','weekAvgDist','weekAvgCharge','weekAvgFuel',
+             'monthTotalDist','monthAvgDist','monthAvgCharge','monthAvgFuel'
+            ].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = '0';
             });
             return;
         }
-        const records = getRecords();
-        if (records.length === 0) {
-            const ids = ['dayTotalDist','dayAvgDist','dayAvgCharge','dayAvgFuel',
-                         'weekTotalDist','weekAvgDist','weekAvgCharge','weekAvgFuel',
-                         'monthTotalDist','monthAvgDist','monthAvgCharge','monthAvgFuel'];
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = '0';
-            });
-            return;
+        // Инициализируем периоды, если ещё не инициализированы
+        if (!widgetPeriods.day.start) {
+            initWidgetPeriods();
         }
-
-        function groupByDate(records) {
-            const map = new Map();
-            records.forEach(r => {
-                const date = r.tripDate;
-                if (!date) return;
-                if (!map.has(date)) map.set(date, { date, distance: 0, charge: 0, fuel: 0 });
-                const entry = map.get(date);
-                entry.distance += parseFloat(r.distance) || 0;
-                entry.charge += parseFloat(r.chargeUsed) || 0;
-                entry.fuel += parseFloat(r.fuelUsed) || 0;
-            });
-            return Array.from(map.values());
-        }
-
-        function filterByDays(days) {
-            const now = new Date();
-            const cutoff = new Date(now);
-            cutoff.setDate(cutoff.getDate() - days);
-            cutoff.setHours(0,0,0,0);
-            return records.filter(r => {
-                if (!r.tripDate) return false;
-                const parts = r.tripDate.split('.');
-                if (parts.length === 3) {
-                    const d = new Date(parts[2], parts[1]-1, parts[0]);
-                    d.setHours(0,0,0,0);
-                    return d >= cutoff;
-                }
-                return false;
-            });
-        }
-
-        // ---- За сегодня (день) ----
-        const todayRecords = filterByDays(0);
-        const todayDays = groupByDate(todayRecords);
-        const totalDistDay = todayDays.reduce((s, d) => s + d.distance, 0);
-        const totalChargeDay = todayDays.reduce((s, d) => s + d.charge, 0);
-        const totalFuelDay = todayDays.reduce((s, d) => s + d.fuel, 0);
-        const countDay = todayDays.length;
-        document.getElementById('dayTotalDist').textContent = totalDistDay.toFixed(1) + ' км';
-        document.getElementById('dayAvgDist').textContent = (countDay ? totalDistDay / countDay : 0).toFixed(1) + ' км';
-        document.getElementById('dayAvgCharge').textContent = (countDay ? totalChargeDay / countDay : 0).toFixed(1) + ' %';
-        document.getElementById('dayAvgFuel').textContent = (countDay ? totalFuelDay / countDay : 0).toFixed(1) + ' %';
-
-        // ---- За неделю (7 дней) ----
-        const weekRecs = filterByDays(7);
-        const weekDays = groupByDate(weekRecs);
-        const totalDistWeek = weekDays.reduce((s, d) => s + d.distance, 0);
-        const totalChargeWeek = weekDays.reduce((s, d) => s + d.charge, 0);
-        const totalFuelWeek = weekDays.reduce((s, d) => s + d.fuel, 0);
-        const countWeek = weekDays.length;
-        document.getElementById('weekTotalDist').textContent = totalDistWeek.toFixed(1) + ' км';
-        document.getElementById('weekAvgDist').textContent = (countWeek ? totalDistWeek / countWeek : 0).toFixed(1) + ' км';
-        document.getElementById('weekAvgCharge').textContent = (countWeek ? totalChargeWeek / countWeek : 0).toFixed(1) + ' %';
-        document.getElementById('weekAvgFuel').textContent = (countWeek ? totalFuelWeek / countWeek : 0).toFixed(1) + ' %';
-
-        // ---- За месяц (30 дней) ----
-        const monthRecs = filterByDays(30);
-        const monthDays = groupByDate(monthRecs);
-        const totalDistMonth = monthDays.reduce((s, d) => s + d.distance, 0);
-        const totalChargeMonth = monthDays.reduce((s, d) => s + d.charge, 0);
-        const totalFuelMonth = monthDays.reduce((s, d) => s + d.fuel, 0);
-        const countMonth = monthDays.length;
-        document.getElementById('monthTotalDist').textContent = totalDistMonth.toFixed(1) + ' км';
-        document.getElementById('monthAvgDist').textContent = (countMonth ? totalDistMonth / countMonth : 0).toFixed(1) + ' км';
-        document.getElementById('monthAvgCharge').textContent = (countMonth ? totalChargeMonth / countMonth : 0).toFixed(1) + ' %';
-        document.getElementById('monthAvgFuel').textContent = (countMonth ? totalFuelMonth / countMonth : 0).toFixed(1) + ' %';
+        updateAllWidgetStats();
     }
 
     // ==========================================
@@ -1505,7 +1675,7 @@
     }
 
     // ==========================================
-    // 12. ЯНДЕКС ДИСК – адаптировано из предоставленного файла для iPhone
+    // 12. ЯНДЕКС ДИСК (облако)
     // ==========================================
     const YANDEX_BACKUP_PATH = 'app:/trip_data.json';
 
@@ -1711,6 +1881,13 @@
             return;
         }
         document.getElementById('chartModal').classList.add('active');
+        // Инициализируем даты по умолчанию (сегодня)
+        const now = new Date();
+        const start = new Date(now);
+        start.setDate(start.getDate() - 29);
+        document.getElementById('startDate').value = formatDateForInput(start);
+        document.getElementById('endDate').value = formatDateForInput(now);
+        setPeriod('today');
         renderChart(records);
     }
 
@@ -1720,6 +1897,87 @@
             chartInstance.destroy();
             chartInstance = null;
         }
+    }
+
+    // Функция для форматирования даты в YYYY-MM-DD
+    function formatDateForInput(date) {
+        const d = new Date(date);
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${year}-${month}-${day}`;
+    }
+
+    function setPeriod(period) {
+        const now = new Date();
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const dateRange = document.getElementById('dateRange');
+        const buttons = document.querySelectorAll('.period-selector button');
+
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        let start = null, end = null;
+
+        if (period === 'today') {
+            start = new Date(now);
+            start.setHours(0,0,0,0);
+            end = new Date(now);
+            end.setHours(23,59,59,999);
+            dateRange.style.display = 'none';
+            document.querySelector('[data-period="today"]').classList.add('active');
+        } else if (period === 'week') {
+            start = new Date(now);
+            start.setDate(start.getDate() - 6);
+            start.setHours(0,0,0,0);
+            end = new Date(now);
+            end.setHours(23,59,59,999);
+            dateRange.style.display = 'none';
+            document.querySelector('[data-period="week"]').classList.add('active');
+        } else if (period === 'month') {
+            start = new Date(now);
+            start.setDate(start.getDate() - 29);
+            start.setHours(0,0,0,0);
+            end = new Date(now);
+            end.setHours(23,59,59,999);
+            dateRange.style.display = 'none';
+            document.querySelector('[data-period="month"]').classList.add('active');
+        } else if (period === 'custom') {
+            dateRange.style.display = 'flex';
+            document.querySelector('[data-period="custom"]').classList.add('active');
+            const startVal = startDateInput.value;
+            const endVal = endDateInput.value;
+            if (startVal && endVal) {
+                start = new Date(startVal);
+                start.setHours(0,0,0,0);
+                end = new Date(endVal);
+                end.setHours(23,59,59,999);
+            }
+        }
+
+        if (period !== 'custom') {
+            if (start) startDateInput.value = formatDateForInput(start);
+            if (end) endDateInput.value = formatDateForInput(end);
+        }
+
+        // Перерисовываем диаграмму
+        const startVal = startDateInput.value;
+        const endVal = endDateInput.value;
+        const records = getRecords();
+        const filtered = filterRecordsByDateRange(records, startVal, endVal);
+        renderChart(filtered);
+        updateSummary(filtered);
+    }
+
+    function updateSummary(filtered) {
+        const totalDist = filtered.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+        const totalCharge = filtered.reduce((s, r) => s + (parseFloat(r.chargeUsed) || 0), 0);
+        const totalFuel = filtered.reduce((s, r) => s + (parseFloat(r.fuelUsed) || 0), 0);
+        const count = filtered.length;
+        document.getElementById('sumDist').textContent = totalDist.toFixed(1) + ' км';
+        document.getElementById('sumCharge').textContent = totalCharge.toFixed(1) + ' %';
+        document.getElementById('sumFuel').textContent = totalFuel.toFixed(1) + ' %';
+        document.getElementById('sumCount').textContent = count;
     }
 
     function renderChart(records) {
@@ -1764,11 +2022,9 @@
         const showAvg = document.getElementById('chkAvg').checked;
 
         const datasets = [];
-        const avgData = {};
-
-        const distAvg = distData.length ? distData.reduce((a,b)=>a+b,0)/distData.length : 0;
-        const chargeAvg = chargeData.length ? chargeData.reduce((a,b)=>a+b,0)/chargeData.length : 0;
-        const fuelAvg = fuelData.length ? fuelData.reduce((a,b)=>a+b,0)/fuelData.length : 0;
+        const avgDist = distData.length ? distData.reduce((a,b)=>a+b,0)/distData.length : 0;
+        const avgCharge = chargeData.length ? chargeData.reduce((a,b)=>a+b,0)/chargeData.length : 0;
+        const avgFuel = fuelData.length ? fuelData.reduce((a,b)=>a+b,0)/fuelData.length : 0;
 
         if (showDist) {
             datasets.push({
@@ -1780,7 +2036,6 @@
                 yAxisID: 'y',
                 type: chartType,
             });
-            avgData.dist = distAvg;
         }
         if (showCharge) {
             datasets.push({
@@ -1792,7 +2047,6 @@
                 yAxisID: 'y1',
                 type: chartType,
             });
-            avgData.charge = chargeAvg;
         }
         if (showFuel) {
             datasets.push({
@@ -1804,14 +2058,13 @@
                 yAxisID: 'y1',
                 type: chartType,
             });
-            avgData.fuel = fuelAvg;
         }
 
         if (showAvg) {
             if (showDist && distData.length) {
                 datasets.push({
                     label: 'Ср. пробег',
-                    data: Array(distData.length).fill(distAvg),
+                    data: Array(distData.length).fill(avgDist),
                     borderColor: '#4a7bc4',
                     borderWidth: 2,
                     borderDash: [5,5],
@@ -1824,7 +2077,7 @@
             if (showCharge && chargeData.length) {
                 datasets.push({
                     label: 'Ср. заряд',
-                    data: Array(chargeData.length).fill(chargeAvg),
+                    data: Array(chargeData.length).fill(avgCharge),
                     borderColor: '#2ecc71',
                     borderWidth: 2,
                     borderDash: [5,5],
@@ -1837,7 +2090,7 @@
             if (showFuel && fuelData.length) {
                 datasets.push({
                     label: 'Ср. топливо',
-                    data: Array(fuelData.length).fill(fuelAvg),
+                    data: Array(fuelData.length).fill(avgFuel),
                     borderColor: '#e67e22',
                     borderWidth: 2,
                     borderDash: [5,5],
@@ -1911,16 +2164,121 @@
                 }
             }
         });
-
-        document.querySelectorAll('#chkDistance, #chkCharge, #chkFuel, #chkAvg, input[name="chartType"]').forEach(el => {
-            el.onchange = function() {
-                renderChart(getRecords());
-            };
-        });
     }
 
+    // Обработчики для диаграммы
+    document.querySelectorAll('.period-selector button[data-period]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const period = this.dataset.period;
+            if (period === 'custom') {
+                document.getElementById('dateRange').style.display = 'flex';
+                document.querySelectorAll('.period-selector button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const startVal = document.getElementById('startDate').value;
+                const endVal = document.getElementById('endDate').value;
+                if (startVal && endVal) {
+                    const records = getRecords();
+                    const filtered = filterRecordsByDateRange(records, startVal, endVal);
+                    renderChart(filtered);
+                    updateSummary(filtered);
+                }
+            } else {
+                setPeriod(period);
+            }
+        });
+    });
+
+    document.getElementById('applyRangeBtn').addEventListener('click', function() {
+        const startVal = document.getElementById('startDate').value;
+        const endVal = document.getElementById('endDate').value;
+        if (!startVal || !endVal) {
+            showToast('Выберите обе даты', 'warning');
+            return;
+        }
+        document.querySelectorAll('.period-selector button').forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-period="custom"]').classList.add('active');
+        const records = getRecords();
+        const filtered = filterRecordsByDateRange(records, startVal, endVal);
+        renderChart(filtered);
+        updateSummary(filtered);
+    });
+
+    document.querySelectorAll('#chkDistance, #chkCharge, #chkFuel, #chkAvg, input[name="chartType"]').forEach(el => {
+        el.addEventListener('change', function() {
+            const startVal = document.getElementById('startDate').value;
+            const endVal = document.getElementById('endDate').value;
+            const records = getRecords();
+            const filtered = filterRecordsByDateRange(records, startVal, endVal);
+            renderChart(filtered);
+        });
+    });
+
     // ==========================================
-    // 14. ОБРАБОТЧИКИ СОБЫТИЙ
+    // 14. ВЫБОР ПЕРИОДА ДЛЯ ВИДЖЕТОВ
+    // ==========================================
+    let currentPickerTarget = null; // 'day', 'week', 'month'
+
+    function openPeriodPicker(target) {
+        currentPickerTarget = target;
+        const period = widgetPeriods[target];
+        if (period && period.start && period.end) {
+            document.getElementById('periodPickerStart').value = formatDateForInput(period.start);
+            document.getElementById('periodPickerEnd').value = formatDateForInput(period.end);
+        } else {
+            // Если период не инициализирован, используем сегодня
+            const now = new Date();
+            document.getElementById('periodPickerStart').value = formatDateForInput(now);
+            document.getElementById('periodPickerEnd').value = formatDateForInput(now);
+        }
+        document.getElementById('periodPickerModal').classList.add('active');
+    }
+
+    document.getElementById('periodPickerClose').addEventListener('click', function() {
+        document.getElementById('periodPickerModal').classList.remove('active');
+    });
+    document.getElementById('periodPickerModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            document.getElementById('periodPickerModal').classList.remove('active');
+        }
+    });
+
+    document.getElementById('periodPickerApply').addEventListener('click', function() {
+        const startVal = document.getElementById('periodPickerStart').value;
+        const endVal = document.getElementById('periodPickerEnd').value;
+        if (!startVal || !endVal) {
+            showToast('Выберите обе даты', 'warning');
+            return;
+        }
+        const start = new Date(startVal);
+        const end = new Date(endVal);
+        start.setHours(0,0,0,0);
+        end.setHours(23,59,59,999);
+        if (start > end) {
+            showToast('Дата начала не может быть позже даты окончания', 'warning');
+            return;
+        }
+        if (currentPickerTarget) {
+            widgetPeriods[currentPickerTarget].start = start;
+            widgetPeriods[currentPickerTarget].end = end;
+            updateWidgetStats(currentPickerTarget);
+            document.getElementById('periodPickerModal').classList.remove('active');
+            showToast(`Период для виджета "${currentPickerTarget}" обновлён`, 'success');
+        }
+    });
+
+    // Обработчики кликов на иконки календаря
+    document.querySelectorAll('.period-picker').forEach(el => {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const target = this.dataset.target;
+            if (target) {
+                openPeriodPicker(target);
+            }
+        });
+    });
+
+    // ==========================================
+    // 15. ОБРАБОТЧИКИ СОБЫТИЙ
     // ==========================================
     document.getElementById('loginBtn').addEventListener('click', function() {
         if (state.authenticated) {
@@ -2223,7 +2581,7 @@
     document.getElementById('clearAllBtn').addEventListener('click', clearAllRecords);
 
     // ==========================================
-    // 15. ИНИЦИАЛИЗАЦИЯ
+    // 16. ИНИЦИАЛИЗАЦИЯ
     // ==========================================
     function init() {
         loadSettings();
@@ -2234,6 +2592,13 @@
 
         updateClock();
         setInterval(updateClock, 10000);
+
+        // Инициализируем периоды виджетов
+        initWidgetPeriods();
+        // Если авторизованы, обновим статистику
+        if (state.authenticated) {
+            updateStats();
+        }
     }
 
     if (document.readyState === 'loading') {
